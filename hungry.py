@@ -9,5 +9,6 @@ hungry=input("are you hungry?")
 if hungry=="yes":
     print("eat taquitos")
     print("eat burritos")
+    print("eat nachos")
 else:
     print("do some sport")
