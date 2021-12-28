@@ -5,4 +5,9 @@ if hungry=='yes':
     print('eat enchiladas')
     print('eat gorditas')
 else:
-    print('do some codding')
+    thirsty=input('are you thirsty?')
+    if thirsty=='yes':
+        print('drink water')
+        print('drink beer')
+    else:
+        print('do nothing')
