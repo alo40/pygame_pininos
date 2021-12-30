@@ -13,3 +13,4 @@ else:
         print('drink mezcal')
     else:
         print('do nothing')
+        print('still nothing')
