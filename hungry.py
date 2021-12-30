@@ -1,5 +1,5 @@
 hungry=input('are you hungry?')
-if hungry=='yes' and hungry=='si':
+if hungry=='yes' and hungry=='Y':
     print('eat taquitos')
     print('eat nachos')
     print('eat enchiladas')
@@ -13,4 +13,3 @@ else:
         print('drink mezcal')
     else:
         print('do nothing')
-        print('still nothing')
