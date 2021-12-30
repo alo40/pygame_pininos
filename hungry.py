@@ -10,5 +10,6 @@ else:
     if thirsty=='yes':
         print('drink water')
         print('drink beer')
+        print('drink mezcal')
     else:
         print('do nothing')
