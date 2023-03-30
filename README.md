@@ -1,5 +1,4 @@
-# test
-first test of pushing from a terminal
+# README
+This repo will contain my first "pininos" into the pygame package.
 
-update:
-this repository will be only used for gittest, that is to test git commands and code versioning.
+Wish me luck!
