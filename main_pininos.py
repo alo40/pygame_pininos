@@ -5,9 +5,9 @@ from sys import exit
 pg.init()
 
 # screen setup
-width = 800
-height = 400
-screen = pg.display.set_mode((800, 400))  # (width, height)
+width = 1600
+height = 800
+screen = pg.display.set_mode((width, height))  # (width, height)
 
 # set game title
 pg.display.set_caption('pininos')
@@ -19,25 +19,26 @@ text_surface = text_font.render('My game', False, 'Black')
 # create clock object to control the frame rates
 clock = pg.time.Clock()
 
+# create ground surface
+ground_surf = pg.image.load('graphics/ground_1600x200.xcf').convert()
+ground_rect = ground_surf.get_rect(bottomleft=(0, height))
+
 # create sky surface
 # sky_surface = pg.image.load('graphics/sky.png')
-sky_surface = pg.Surface((800, 350))
-sky_surface.fill((0, 255, 255))  # cyan
+sky_surf = pg.Surface((width, height - ground_rect.height))
+sky_surf.fill((0, 255, 255))  # cyan
 
-# create ground surface
-ground_surface = pg.image.load('graphics/ground.png').convert()
+# create hero surface/rectangle
+hero_surf = pg.image.load('graphics/hero_200x300.xcf').convert_alpha()
+hero_rect = hero_surf.get_rect(midbottom=(200, height - ground_rect.height))
 
-# create hero surface
-hero_surface = pg.image.load('graphics/hero.png').convert_alpha()
-hero_x_position = 200
+# create enemy_01 surface/rectangle
+enemy_01_surf = pg.image.load('graphics/enemy_01.xcf').convert_alpha()
+enemy_01_rect = enemy_01_surf.get_rect(midbottom=(600, height - ground_rect.height))
 
-# create enemy_01 surface
-enemy_01_surface = pg.image.load('graphics/enemy_01.xcf').convert_alpha()
-enemy_01_x_position = 100
-
-# create enemy_02 surface
-enemy_02_surface = pg.image.load('graphics/enemy_02.xcf').convert_alpha()
-enemy_02_x_position = 500
+# create enemy_02 surface/rectangle
+enemy_02_surf = pg.image.load('graphics/enemy_02.xcf').convert_alpha()
+enemy_02_rect = enemy_02_surf.get_rect(midbottom=(1000, height - ground_rect.height))
 
 # game loop
 while True:
@@ -49,19 +50,18 @@ while True:
             exit()  # to close the while: True loop
 
     # draw background
-    screen.blit(sky_surface, (0, 0))  # (x, y) position
-    screen.blit(ground_surface, (0, 350))
+    screen.blit(sky_surf, (0, 0))  # (x, y) position
+    screen.blit(ground_surf, (0, height - 200))
 
     # draw hero
-    hero_x_position -= 4
-    screen.blit(hero_surface, (hero_x_position, 40))
-    if hero_x_position < -350: hero_x_position = 800
+    screen.blit(hero_surf, hero_rect)
+    if hero_rect.left > width: hero_rect.left = 0
 
     # draw enemy_01
-    screen.blit(enemy_01_surface, (enemy_01_x_position, 40))
+    screen.blit(enemy_01_surf, enemy_01_rect)
 
     # draw enemy_02
-    screen.blit(enemy_02_surface, (enemy_02_x_position, 40))
+    screen.blit(enemy_02_surf, enemy_02_rect)
 
     # # draw text
     # screen.blit(text_surface, (25, 25))
