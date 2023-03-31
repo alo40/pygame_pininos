@@ -40,7 +40,7 @@ enemy_02_surf = pg.image.load('graphics/enemy_02.xcf').convert_alpha()
 enemy_02_rect = enemy_02_surf.get_rect(midbottom=(1000, height - ground_rect.height))
 
 # game parameters
-mov_speed = 2  # hero and enemies movement speed
+mov_speed = 2  # enemies movement speed
 
 # game loop
 while True:
@@ -51,16 +51,29 @@ while True:
             pg.quit()
             exit()  # to close the while: True loop
 
-    ## DRAWING #######################################################################
-
     # draw background
     screen.blit(sky_surf, (0, 0))  # (x, y) position
     screen.blit(ground_surf, (0, height - ground_rect.height))
 
+    ## HERO MOVEMENT #################################################################
+
+    # Get the state of the keyboard
+    keys = pg.key.get_pressed()
+
+    # press keyboard left
+    if keys[pg.K_LEFT]:
+        hero_rect.x -= 10
+
+    # press keyboard right
+    elif keys[pg.K_RIGHT]:
+        hero_rect.x += 10
+
     # draw hero
     screen.blit(hero_surf, hero_rect)
-    hero_rect.left += mov_speed
     if hero_rect.left > width: hero_rect.right = 0
+    if hero_rect.right < 0: hero_rect.left = width
+
+    ## ENEMIES MOVEMENT ################################################################
 
     # # draw enemy_01 (to be used later)
     # screen.blit(enemy_01_surf, enemy_01_rect)
@@ -83,8 +96,8 @@ while True:
     mouse_val = pg.mouse.get_pressed()
 
     # Create a text surface with the mouse position
-    text_mouse_pos = text_font.render(f"Mouse pressed: {mouse_val}", True, (0, 0, 0))
-    screen.blit(text_mouse_pos, (10, 50))
+    text_mouse_val = text_font.render(f"Mouse pressed: {mouse_val}", True, (0, 0, 0))
+    screen.blit(text_mouse_val, (10, 50))
 
     ## COLLISION #######################################################################
 
