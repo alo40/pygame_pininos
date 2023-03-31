@@ -31,6 +31,14 @@ ground_surface = pg.image.load('graphics/ground.png').convert()
 hero_surface = pg.image.load('graphics/hero.png').convert_alpha()
 hero_x_position = 200
 
+# create enemy_01 surface
+enemy_01_surface = pg.image.load('graphics/enemy_01.xcf').convert_alpha()
+enemy_01_x_position = 100
+
+# create enemy_02 surface
+enemy_02_surface = pg.image.load('graphics/enemy_02.xcf').convert_alpha()
+enemy_02_x_position = 500
+
 # game loop
 while True:
     # loop through events
@@ -49,8 +57,14 @@ while True:
     screen.blit(hero_surface, (hero_x_position, 40))
     if hero_x_position < -350: hero_x_position = 800
 
-    # draw text
-    screen.blit(text_surface, (25, 25))
+    # draw enemy_01
+    screen.blit(enemy_01_surface, (enemy_01_x_position, 40))
+
+    # draw enemy_02
+    screen.blit(enemy_02_surface, (enemy_02_x_position, 40))
+
+    # # draw text
+    # screen.blit(text_surface, (25, 25))
 
     # update everything
     pg.display.update()
