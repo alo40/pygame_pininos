@@ -14,7 +14,7 @@ pg.display.set_caption('pininos')
 
 # create font
 text_font = pg.font.Font('font/Pixeltype.ttf', 50)
-text_surface = text_font.render('My game', False, 'Black')
+text_surface = text_font.render('COLLISION!', False, 'Red')
 
 # create clock object to control the frame rates
 clock = pg.time.Clock()
@@ -40,6 +40,9 @@ enemy_01_rect = enemy_01_surf.get_rect(midbottom=(600, height - ground_rect.heig
 enemy_02_surf = pg.image.load('graphics/enemy_02.xcf').convert_alpha()
 enemy_02_rect = enemy_02_surf.get_rect(midbottom=(1000, height - ground_rect.height))
 
+# game parameters
+mov_speed = 2  # hero and enemies movement speed
+
 # game loop
 while True:
     # loop through events
@@ -55,7 +58,7 @@ while True:
 
     # draw hero
     screen.blit(hero_surf, hero_rect)
-    hero_rect.left += 2
+    hero_rect.left += mov_speed
     if hero_rect.left > width: hero_rect.right = 0
 
     # # draw enemy_01 (to be used later)
@@ -63,11 +66,17 @@ while True:
 
     # draw enemy_02
     screen.blit(enemy_02_surf, enemy_02_rect)
-    enemy_02_rect.left -= 2
+    enemy_02_rect.left -= mov_speed
     if enemy_02_rect.right < 0: enemy_02_rect.left = width
 
-    # draw text
-    screen.blit(text_surface, (25, 25))
+    # hero collision with enemy_02!
+    if hero_rect.colliderect(enemy_02_rect):
+        screen.blit(text_surface, (25, 25))
+
+    # hero collision with mouse!
+    mouse_pos = pg.mouse.get_pos()
+    if hero_rect.collidepoint(mouse_pos):
+        screen.blit(text_surface, (25, 25))
 
     # update everything
     pg.display.update()
