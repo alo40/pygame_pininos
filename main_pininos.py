@@ -51,20 +51,23 @@ while True:
 
     # draw background
     screen.blit(sky_surf, (0, 0))  # (x, y) position
-    screen.blit(ground_surf, (0, height - 200))
+    screen.blit(ground_surf, (0, height - ground_rect.height))
 
     # draw hero
     screen.blit(hero_surf, hero_rect)
-    if hero_rect.left > width: hero_rect.left = 0
+    hero_rect.left += 2
+    if hero_rect.left > width: hero_rect.right = 0
 
-    # draw enemy_01
-    screen.blit(enemy_01_surf, enemy_01_rect)
+    # # draw enemy_01 (to be used later)
+    # screen.blit(enemy_01_surf, enemy_01_rect)
 
     # draw enemy_02
     screen.blit(enemy_02_surf, enemy_02_rect)
+    enemy_02_rect.left -= 2
+    if enemy_02_rect.right < 0: enemy_02_rect.left = width
 
-    # # draw text
-    # screen.blit(text_surface, (25, 25))
+    # draw text
+    screen.blit(text_surface, (25, 25))
 
     # update everything
     pg.display.update()
