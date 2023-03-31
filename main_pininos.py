@@ -14,7 +14,6 @@ pg.display.set_caption('pininos')
 
 # create font
 text_font = pg.font.Font('font/Pixeltype.ttf', 50)
-text_surface = text_font.render('COLLISION!', False, 'Red')
 
 # create clock object to control the frame rates
 clock = pg.time.Clock()
@@ -52,6 +51,8 @@ while True:
             pg.quit()
             exit()  # to close the while: True loop
 
+    ## DRAWING #######################################################################
+
     # draw background
     screen.blit(sky_surf, (0, 0))  # (x, y) position
     screen.blit(ground_surf, (0, height - ground_rect.height))
@@ -69,14 +70,34 @@ while True:
     enemy_02_rect.left -= mov_speed
     if enemy_02_rect.right < 0: enemy_02_rect.left = width
 
+    ## MOUSE STATUS ####################################################################
+
+    # Get the position of the mouse
+    mouse_pos = pg.mouse.get_pos()
+
+    # Create a text surface with the mouse position
+    text_mouse_pos = text_font.render(f"Mouse position: {mouse_pos}", True, (0, 0, 0))
+    screen.blit(text_mouse_pos, (10, 10))
+
+    # Get the values of the mouse clicks
+    mouse_val = pg.mouse.get_pressed()
+
+    # Create a text surface with the mouse position
+    text_mouse_pos = text_font.render(f"Mouse pressed: {mouse_val}", True, (0, 0, 0))
+    screen.blit(text_mouse_pos, (10, 50))
+
+    ## COLLISION #######################################################################
+
+    # Create a text surface for collision text
+    text_collision = text_font.render('COLLISION!', False, 'Red')
+
     # hero collision with enemy_02!
     if hero_rect.colliderect(enemy_02_rect):
-        screen.blit(text_surface, (25, 25))
+        screen.blit(text_collision, (10, 90))
 
     # hero collision with mouse!
-    mouse_pos = pg.mouse.get_pos()
     if hero_rect.collidepoint(mouse_pos):
-        screen.blit(text_surface, (25, 25))
+        screen.blit(text_collision, (10, 90))
 
     # update everything
     pg.display.update()
