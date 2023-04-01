@@ -39,12 +39,12 @@ enemy_01_rect = enemy_01_surf.get_rect(midbottom=(600, height - ground_rect.heig
 enemy_02_surf = pg.image.load('graphics/enemy_02.xcf').convert_alpha()
 enemy_02_rect = enemy_02_surf.get_rect(midbottom=(1000, height - ground_rect.height))
 
-# create a surface to draw the attack circle on
+# create a surface to draw the attack on
 attack_surf = pg.Surface((width, height), pg.SRCALPHA)
 
 # set the time to display the attack
-display_time = 200  # in milliseconds
-attack_start_time = None
+display_time = 1000  # in milliseconds
+attack_start_time = 0
 
 # game parameters
 mov_speed = 2  # enemies movement speed
@@ -85,11 +85,22 @@ while True:
     screen.blit(attack_surf, (0, 0))
 
     # check if the circle has been displayed for long enough
-    if attack_start_time is not None and pg.time.get_ticks() - attack_start_time >= display_time:
+    attack_delta_time = pg.time.get_ticks() - attack_start_time
+    if attack_start_time is not None and attack_delta_time >= display_time:
 
         # reset the start time and clear the circle surface
-        attack_start_time = None
+        attack_start_time = 0
         attack_surf.fill((0, 0, 0, 0))
+
+    # Create a text surface with the mouse position (for testing only)
+    text_attack_time = text_font.render(f"attack_start_time: {attack_start_time}", True, (0, 0, 0))
+    screen.blit(text_attack_time, (1100, 10))
+
+    text_attack_time = text_font.render(f"pg.time.get_ticks(): {pg.time.get_ticks()}", True, (0, 0, 0))
+    screen.blit(text_attack_time, (1100, 50))
+
+    text_attack_time = text_font.render(f"attack_delta_time: {attack_delta_time}", True, (0, 0, 0))
+    screen.blit(text_attack_time, (1100, 90))
 
     ## MOUSE STATUS ####################################################################
 
