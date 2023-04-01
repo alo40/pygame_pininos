@@ -7,7 +7,7 @@ pg.init()
 # screen setup
 width = 1600
 height = 800
-screen = pg.display.set_mode((width, height))  # (width, height)
+screen = pg.display.set_mode((width, height))  # canvas for everything!
 
 # set game title
 pg.display.set_caption('pininos')
@@ -39,49 +39,57 @@ enemy_01_rect = enemy_01_surf.get_rect(midbottom=(600, height - ground_rect.heig
 enemy_02_surf = pg.image.load('graphics/enemy_02.xcf').convert_alpha()
 enemy_02_rect = enemy_02_surf.get_rect(midbottom=(1000, height - ground_rect.height))
 
+# create a surface to draw the attack circle on
+attack_surf = pg.Surface((width, height), pg.SRCALPHA)
+
+# set the time to display the attack
+display_time = 200  # in milliseconds
+attack_start_time = None
+
 # game parameters
 mov_speed = 2  # enemies movement speed
 
 # game loop
 while True:
+
     # loop through events
     for event in pg.event.get():
-        # QUIT = x button of the window
-        if event.type == pg.QUIT:
+
+        ## EVENT: QUIT BUTTON ##########################################################
+        if event.type == pg.QUIT:  # QUIT = x button of the window
             pg.quit()
             exit()  # to close the while: True loop
+
+        ## EVENT: HERO ATTACK ##########################################################
+        elif event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:  # left mouse button
+
+                # get the position of the mouse click
+                mouse_pos = pg.mouse.get_pos()
+
+                # draw the attack on the attack surface at the mouse position
+                pg.draw.circle(attack_surf, 'Red', mouse_pos, 10)
+
+                # set the start time for the attack display
+                attack_start_time = pg.time.get_ticks()
+
+    ## DRAW BACKGROUND #################################################################
 
     # draw background
     screen.blit(sky_surf, (0, 0))  # (x, y) position
     screen.blit(ground_surf, (0, height - ground_rect.height))
 
-    ## HERO MOVEMENT #################################################################
+    ## HERO ATTACK #####################################################################
 
-    # Get the state of the keyboard
-    keys = pg.key.get_pressed()
+    # draw the circle surface on top of the screen surface (after draw background)
+    screen.blit(attack_surf, (0, 0))
 
-    # press keyboard left
-    if keys[pg.K_LEFT]:
-        hero_rect.x -= 10
+    # check if the circle has been displayed for long enough
+    if attack_start_time is not None and pg.time.get_ticks() - attack_start_time >= display_time:
 
-    # press keyboard right
-    elif keys[pg.K_RIGHT]:
-        hero_rect.x += 10
-
-    # draw hero
-    screen.blit(hero_surf, hero_rect)
-    if hero_rect.left > width: hero_rect.right = 0
-    if hero_rect.right < 0: hero_rect.left = width
-
-    ## ENEMIES MOVEMENT ################################################################
-
-    # # draw enemy_01 (to be used later)
-    # screen.blit(enemy_01_surf, enemy_01_rect)
-
-    # draw enemy_02
-    screen.blit(enemy_02_surf, enemy_02_rect)
-    enemy_02_rect.left -= mov_speed
-    if enemy_02_rect.right < 0: enemy_02_rect.left = width
+        # reset the start time and clear the circle surface
+        attack_start_time = None
+        attack_surf.fill((0, 0, 0, 0))
 
     ## MOUSE STATUS ####################################################################
 
@@ -99,6 +107,34 @@ while True:
     text_mouse_val = text_font.render(f"Mouse pressed: {mouse_val}", True, (0, 0, 0))
     screen.blit(text_mouse_val, (10, 50))
 
+    ## HERO MOVEMENT #################################################################
+
+    # Get the state of the keyboard
+    keys = pg.key.get_pressed()
+
+    # press keyboard left
+    if keys[pg.K_LEFT]:
+        hero_rect.x -= 10
+
+    # press keyboard right
+    elif keys[pg.K_RIGHT]:
+        hero_rect.x += 10
+
+    # draw hero
+    screen.blit(hero_surf, hero_rect)
+    if hero_rect.left > width: hero_rect.right = 0  # redraw hero on left end
+    if hero_rect.right < 0: hero_rect.left = width  # # redraw hero on right end
+
+    ## ENEMIES MOVEMENT ################################################################
+
+    # # draw enemy_01 (to be used later)
+    # screen.blit(enemy_01_surf, enemy_01_rect)
+
+    # draw enemy_02
+    screen.blit(enemy_02_surf, enemy_02_rect)
+    enemy_02_rect.left -= mov_speed
+    if enemy_02_rect.right < 0: enemy_02_rect.left = width
+
     ## COLLISION #######################################################################
 
     # Create a text surface for collision text
@@ -111,6 +147,8 @@ while True:
     # hero collision with mouse!
     if hero_rect.collidepoint(mouse_pos):
         screen.blit(text_collision, (10, 90))
+
+    ## LOOP END ##########################################################################
 
     # update everything
     pg.display.update()
