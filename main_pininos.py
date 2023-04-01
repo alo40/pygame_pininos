@@ -12,8 +12,9 @@ screen = pg.display.set_mode((width, height))  # canvas for everything!
 # set game title
 pg.display.set_caption('pininos')
 
-# create font
-text_pixel_font = pg.font.Font('font/Pixeltype.ttf', 50)
+# create fonts
+game_active_font = pg.font.Font('font/Pixeltype.ttf', 50)
+game_over_font = pg.font.Font('font/Pixeltype.ttf', 200)
 
 # create clock object to control the frame rates
 game_clock = pg.time.Clock()
@@ -77,7 +78,33 @@ while True:
 
     # Game mode: game over
     if game_over:
+
+        # black screen
         screen.fill('Black')
+
+        # game over text (big font)
+        text_game_over = game_over_font.render(f"GAME OVER", True, 'Red')
+        game_over_rect = text_game_over.get_rect(center=(width/2, height/2))
+        screen.blit(text_game_over, game_over_rect)
+
+        # restart text (small font)
+        text_game_restart = game_active_font.render(f"press SPACE to restart", True, 'Red')
+        game_restart_rect = text_game_restart.get_rect(center=(width/2, (height/2)+100))
+        screen.blit(text_game_restart, game_restart_rect)
+
+        # Get the state of the keyboard
+        keys = pg.key.get_pressed()
+
+        # press keyboard left
+        if keys[pg.K_SPACE]:
+
+            # restart hero and enemies position
+            hero_rect.x = 200
+            hero_rect.y = height - ground_rect.height
+            enemy_02_rect.x = 1000
+
+            # restart game
+            game_over = False
 
     # Game mode: game active
     else:
@@ -94,14 +121,14 @@ while True:
         mouse_pos = pg.mouse.get_pos()
 
         # Create a text surface with the mouse position
-        text_mouse_pos = text_pixel_font.render(f"Mouse position: {mouse_pos}", True, 'Black')
+        text_mouse_pos = game_active_font.render(f"Mouse position: {mouse_pos}", True, 'Black')
         screen.blit(text_mouse_pos, (10, 10))
 
         # Get the values of the mouse clicks
         mouse_val = pg.mouse.get_pressed()
 
         # Create a text surface with the mouse position
-        text_mouse_val = text_pixel_font.render(f"Mouse pressed: {mouse_val}", True, 'Black')
+        text_mouse_val = game_active_font.render(f"Mouse pressed: {mouse_val}", True, 'Black')
         screen.blit(text_mouse_val, (10, 50))
 
         ## HERO MOVEMENT #################################################################
@@ -124,16 +151,16 @@ while True:
         # press keyboard up
         if keys[pg.K_UP]:
             # jump action
-            text_action = text_pixel_font.render('Action mode: JUMP', False, 'Black')
+            text_action = game_active_font.render('Action mode: JUMP', False, 'Black')
             hero_rect.y -= jump_gravity  # positive y-axis is facing down
         else:
             # on ground action
-            text_action = text_pixel_font.render('Action mode: ON GROUND', False, 'Black')
+            text_action = game_active_font.render('Action mode: ON GROUND', False, 'Black')
             if hero_rect.bottom >= height - ground_rect.height:
                 hero_rect.bottom = height - ground_rect.height
             else:
                 # falling action
-                text_action = text_pixel_font.render('Action mode: FALLING', False, 'Black')
+                text_action = game_active_font.render('Action mode: FALLING', False, 'Black')
                 hero_rect.y += 1.5 * jump_gravity
 
         # draw jump action in screen
@@ -156,13 +183,13 @@ while True:
             attack_surf.fill((0, 0, 0, 0))
 
         # Create a text surface with the mouse position (for testing only)
-        text_attack_time = text_pixel_font.render(f"attack_start_time: {attack_start_time}", True, 'Black')
+        text_attack_time = game_active_font.render(f"attack_start_time: {attack_start_time}", True, 'Black')
         screen.blit(text_attack_time, (1150, 10))
         ###
-        text_attack_time = text_pixel_font.render(f"pg.time.get_ticks(): {pg.time.get_ticks()}", True, 'Black')
+        text_attack_time = game_active_font.render(f"pg.time.get_ticks(): {pg.time.get_ticks()}", True, 'Black')
         screen.blit(text_attack_time, (1150, 50))
         ###
-        text_attack_time = text_pixel_font.render(f"attack_delta_time: {attack_delta_time}", True, 'Black')
+        text_attack_time = game_active_font.render(f"attack_delta_time: {attack_delta_time}", True, 'Black')
         screen.blit(text_attack_time, (1150, 90))
 
         ## ENEMIES MOVEMENT ################################################################
@@ -179,13 +206,13 @@ while True:
 
         # hero collision with enemy_02!
         if hero_rect.colliderect(enemy_02_rect):
-            text_collision = text_pixel_font.render('Enemy collision: GAME OVER!', False, 'Red')
+            text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
             screen.blit(text_collision, (650, 10))
             game_over = True  # GAME OVER!
 
         # hero collision with mouse!
         if hero_rect.collidepoint(mouse_pos):
-            text_collision = text_pixel_font.render('Mouse collision!', False, 'Red')
+            text_collision = game_active_font.render('Mouse collision!', False, 'Red')
             screen.blit(text_collision, (650, 10))
 
     ## LOOP END ########################################################################
