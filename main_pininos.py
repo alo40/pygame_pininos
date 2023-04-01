@@ -47,7 +47,8 @@ display_time = 1000  # in milliseconds
 attack_start_time = 0
 
 # game parameters
-mov_speed = 2  # enemies movement speed
+move_speed = 10  # enemies movement speed
+jump_gravity = 10  # overall gravity (not realistic)
 
 # game loop
 while True:
@@ -79,6 +80,60 @@ while True:
     screen.blit(sky_surf, (0, 0))  # (x, y) position
     screen.blit(ground_surf, (0, height - ground_rect.height))
 
+    ## MOUSE STATUS ####################################################################
+
+    # Get the position of the mouse
+    mouse_pos = pg.mouse.get_pos()
+
+    # Create a text surface with the mouse position
+    text_mouse_pos = text_font.render(f"Mouse position: {mouse_pos}", True, 'Black')
+    screen.blit(text_mouse_pos, (10, 10))
+
+    # Get the values of the mouse clicks
+    mouse_val = pg.mouse.get_pressed()
+
+    # Create a text surface with the mouse position
+    text_mouse_val = text_font.render(f"Mouse pressed: {mouse_val}", True, 'Black')
+    screen.blit(text_mouse_val, (10, 50))
+
+    ## HERO MOVEMENT #################################################################
+
+    # Get the state of the keyboard
+    keys = pg.key.get_pressed()
+
+    # press keyboard left
+    if keys[pg.K_LEFT]:
+        hero_rect.x -= move_speed
+
+    # press keyboard right
+    elif keys[pg.K_RIGHT]:
+        hero_rect.x += move_speed
+
+    # reset position if screen limit is reached
+    if hero_rect.left > width: hero_rect.right = 0  # redraw hero on left end
+    if hero_rect.right < 0: hero_rect.left = width  # # redraw hero on right end
+
+    # press keyboard up
+    if keys[pg.K_UP]:
+        # jump action
+        text_action = text_font.render('Action mode: JUMP', False, 'Black')
+        hero_rect.y -= jump_gravity  # positive y-axis is facing down
+    else:
+        # on ground action
+        text_action = text_font.render('Action mode: ON GROUND', False, 'Black')
+        if hero_rect.bottom >= height - ground_rect.height:
+            hero_rect.bottom = height - ground_rect.height
+        else:
+            # falling action
+            text_action = text_font.render('Action mode: FALLING', False, 'Black')
+            hero_rect.y += 1.5 *jump_gravity
+
+    # draw jump action in screen
+    screen.blit(text_action, (10, 90))
+
+    # draw hero
+    screen.blit(hero_surf, hero_rect)
+
     ## HERO ATTACK #####################################################################
 
     # draw the circle surface on top of the screen surface (after draw background)
@@ -94,47 +149,13 @@ while True:
 
     # Create a text surface with the mouse position (for testing only)
     text_attack_time = text_font.render(f"attack_start_time: {attack_start_time}", True, (0, 0, 0))
-    screen.blit(text_attack_time, (1100, 10))
-
+    screen.blit(text_attack_time, (1150, 10))
+    ###
     text_attack_time = text_font.render(f"pg.time.get_ticks(): {pg.time.get_ticks()}", True, (0, 0, 0))
-    screen.blit(text_attack_time, (1100, 50))
-
+    screen.blit(text_attack_time, (1150, 50))
+    ###
     text_attack_time = text_font.render(f"attack_delta_time: {attack_delta_time}", True, (0, 0, 0))
-    screen.blit(text_attack_time, (1100, 90))
-
-    ## MOUSE STATUS ####################################################################
-
-    # Get the position of the mouse
-    mouse_pos = pg.mouse.get_pos()
-
-    # Create a text surface with the mouse position
-    text_mouse_pos = text_font.render(f"Mouse position: {mouse_pos}", True, (0, 0, 0))
-    screen.blit(text_mouse_pos, (10, 10))
-
-    # Get the values of the mouse clicks
-    mouse_val = pg.mouse.get_pressed()
-
-    # Create a text surface with the mouse position
-    text_mouse_val = text_font.render(f"Mouse pressed: {mouse_val}", True, (0, 0, 0))
-    screen.blit(text_mouse_val, (10, 50))
-
-    ## HERO MOVEMENT #################################################################
-
-    # Get the state of the keyboard
-    keys = pg.key.get_pressed()
-
-    # press keyboard left
-    if keys[pg.K_LEFT]:
-        hero_rect.x -= 10
-
-    # press keyboard right
-    elif keys[pg.K_RIGHT]:
-        hero_rect.x += 10
-
-    # draw hero
-    screen.blit(hero_surf, hero_rect)
-    if hero_rect.left > width: hero_rect.right = 0  # redraw hero on left end
-    if hero_rect.right < 0: hero_rect.left = width  # # redraw hero on right end
+    screen.blit(text_attack_time, (1150, 90))
 
     ## ENEMIES MOVEMENT ################################################################
 
@@ -143,7 +164,7 @@ while True:
 
     # draw enemy_02
     screen.blit(enemy_02_surf, enemy_02_rect)
-    enemy_02_rect.left -= mov_speed
+    enemy_02_rect.left -= move_speed/4  # slower than hero movement speed
     if enemy_02_rect.right < 0: enemy_02_rect.left = width
 
     ## COLLISION #######################################################################
@@ -153,11 +174,11 @@ while True:
 
     # hero collision with enemy_02!
     if hero_rect.colliderect(enemy_02_rect):
-        screen.blit(text_collision, (10, 90))
+        screen.blit(text_collision, (750, 10))
 
     # hero collision with mouse!
     if hero_rect.collidepoint(mouse_pos):
-        screen.blit(text_collision, (10, 90))
+        screen.blit(text_collision, (750, 10))
 
     ## LOOP END ##########################################################################
 
