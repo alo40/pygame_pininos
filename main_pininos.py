@@ -1,6 +1,7 @@
 import pygame as pg
 from sys import exit
 from random import randint
+from enum import Enum
 
 # game init
 pg.init()
@@ -60,6 +61,14 @@ pg.time.set_timer(obstacle_timer, 1000)  # tigger event in x ms
 move_speed = 10  # overall movement speed
 jump_gravity = 10  # overall gravity (not realistic)
 game_over = False  # set to True for game over
+
+# hero actions (using Enum)
+class action(Enum):
+    ON_GROUND = 1
+    JUMPING = 2
+    FALLING = 3
+
+hero_action = action.ON_GROUND
 
 # game loop
 while True:
@@ -177,18 +186,26 @@ while True:
 
         # press keyboard up
         if keys[pg.K_UP]:
-            # jump action
-            text_action = game_active_font.render('Action mode: JUMP', False, 'Black')
-            hero_rect.y -= jump_gravity  # positive y-axis is facing down
+            # if hero is jumping
+            if hero_action == action.JUMPING:
+                print('hero is jumping!')
+            else:
+                # jump action
+                text_action = game_active_font.render('Action mode: JUMP', False, 'Black')
+                hero_rect.y -= jump_gravity  # positive y-axis is facing down
+                hero_action = action.JUMPING
+
         else:
             # on ground action
             text_action = game_active_font.render('Action mode: ON GROUND', False, 'Black')
             if hero_rect.bottom >= height - ground_rect.height:
                 hero_rect.bottom = height - ground_rect.height
+                hero_action = action.ON_GROUND
             else:
                 # falling action
                 text_action = game_active_font.render('Action mode: FALLING', False, 'Black')
                 hero_rect.y += 1.5 * jump_gravity
+                hero_action = action.FALLING
 
         # draw jump action in screen
         screen.blit(text_action, (10, 90))
@@ -228,7 +245,6 @@ while True:
         screen.blit(enemy_02_surf, enemy_02_rect)
         enemy_02_rect.left -= move_speed / 4  # slower than hero movement speed
         if enemy_02_rect.right < 0: enemy_02_rect.left = width
-
 
         ## COLLISION #######################################################################
 
