@@ -38,12 +38,12 @@ enemy_01_surf = pg.image.load('graphics/evil_eye.png').convert_alpha()
 enemy_01_surf = pg.transform.scale(enemy_01_surf, (72, 68))
 enemy_01_rect = enemy_01_surf.get_rect(midbottom=(600, height - ground_rect.height))
 
+# create enemy_01 rectangle list
+enemy_01_rect_list = []
+
 # create enemy_02 surface/rectangle
 enemy_02_surf = pg.image.load('graphics/ogre_ia_simple.png').convert_alpha()
 enemy_02_rect = enemy_02_surf.get_rect(midbottom=(1000, height - ground_rect.height))
-
-# create obstacle rectangle list
-obstacle_rect_list = []
 
 # create a surface to draw the attack on
 attack_surf = pg.Surface((width, height), pg.SRCALPHA)
@@ -85,22 +85,20 @@ while True:
                 # set the start time for the attack display
                 attack_start_time = pg.time.get_ticks()
 
-        ## TIMER EVENT: OBSTACLE #######################################################
+        ## TIMER EVENT: ENEMY_01 SPAWN #################################################
         if event.type == obstacle_timer and not game_over:
 
             # obstacle appear at random position
             rand_position = randint(600, 1800)
-            obstacle_rect = enemy_01_surf.get_rect(bottomright=(rand_position, height-300))
+            enemy_01_rect_index = enemy_01_surf.get_rect(bottomright=(rand_position, height - 300))
 
             # append obstacle only if
-            if not obstacle_rect_list:  # empty list
-                # print(f'list size = {len(obstacle_rect_list)}, empty list = {obstacle_rect_list}')  # for debug
-                obstacle_rect_list.append(obstacle_rect)
+            if not enemy_01_rect_list:  # empty list
+                enemy_01_rect_list.append(enemy_01_rect_index)
             else:
-                # print(f'list size = {len(obstacle_rect_list)}, list = {obstacle_rect_list}') # for debug
-                obstacle_rect_list.append(obstacle_rect)
-                for obstacle in obstacle_rect_list:
-                    if obstacle.x < 0: obstacle_rect_list.remove(obstacle)
+                enemy_01_rect_list.append(enemy_01_rect_index)
+                for obstacle in enemy_01_rect_list:
+                    if obstacle.x < 0: enemy_01_rect_list.remove(obstacle)
 
     # Game mode: game over
     if game_over:
@@ -220,27 +218,23 @@ while True:
 
         ## ENEMIES MOVEMENT ################################################################
 
-        # # draw enemy_01 (used as obstacle)
-        # screen.blit(enemy_01_surf, enemy_01_rect)
+        # draw enemy_01 and movement
+        if enemy_01_rect_list:  # check if list is not empty
+            for enemy_01_rect_index in enemy_01_rect_list:
+                screen.blit(enemy_01_surf, enemy_01_rect_index)
+                enemy_01_rect_index.x -= move_speed
 
-        # draw enemy_02
+        # draw enemy_02 and movement
         screen.blit(enemy_02_surf, enemy_02_rect)
-
-        # enemy_02 movement
         enemy_02_rect.left -= move_speed / 4  # slower than hero movement speed
         if enemy_02_rect.right < 0: enemy_02_rect.left = width
 
-        # draw obstacle and obstacle movement
-        if obstacle_rect_list:  # check if list is not empty
-            for obstacle_rect in obstacle_rect_list:
-                screen.blit(enemy_01_surf, obstacle_rect)
-                obstacle_rect.x -= move_speed
 
         ## COLLISION #######################################################################
 
         # hero collision with enemy_01 (obstacle)!
-        for obstacle_rect in obstacle_rect_list:
-            if hero_rect.colliderect(obstacle_rect):
+        for enemy_01_rect_index in enemy_01_rect_list:
+            if hero_rect.colliderect(enemy_01_rect_index):
                 text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
                 screen.blit(text_collision, (650, 10))
                 # game_over = True  # GAME OVER!
@@ -254,7 +248,7 @@ while True:
         # hero collision with mouse!
         if hero_rect.collidepoint(mouse_pos):
             text_collision = game_active_font.render('Mouse collision!', False, 'Red')
-            screen.blit(text_collision, (650, 10))
+            screen.blit(text_collision, (650, 50))
 
     ## LOOP END ########################################################################
 
