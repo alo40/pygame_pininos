@@ -1,5 +1,6 @@
 import pygame as pg
 from sys import exit
+from random import randint
 
 # game init
 pg.init()
@@ -33,19 +34,27 @@ hero_surf = pg.image.load('graphics/soldier_simple.png').convert_alpha()
 hero_rect = hero_surf.get_rect(midbottom=(200, height - ground_rect.height))
 
 # create enemy_01 surface/rectangle
-enemy_01_surf = pg.image.load('graphics/enemy_01.xcf').convert_alpha()
+enemy_01_surf = pg.image.load('graphics/evil_eye.png').convert_alpha()
+enemy_01_surf = pg.transform.scale(enemy_01_surf, (72, 68))
 enemy_01_rect = enemy_01_surf.get_rect(midbottom=(600, height - ground_rect.height))
 
 # create enemy_02 surface/rectangle
 enemy_02_surf = pg.image.load('graphics/ogre_ia_simple.png').convert_alpha()
 enemy_02_rect = enemy_02_surf.get_rect(midbottom=(1000, height - ground_rect.height))
 
+# create obstacle rectangle list
+obstacle_rect_list = []
+
 # create a surface to draw the attack on
 attack_surf = pg.Surface((width, height), pg.SRCALPHA)
 
 # set the time to display the attack
-attack_display_time = 1000  # in milliseconds
+attack_display_time = 2000  # in milliseconds
 attack_start_time = 0
+
+# timers
+obstacle_timer = pg.USEREVENT + 1  # + 1 is used to avoid conflicts with pygame user events
+pg.time.set_timer(obstacle_timer, 1000)  # tigger event in x ms
 
 # game parameters
 move_speed = 10  # overall movement speed
@@ -75,6 +84,23 @@ while True:
 
                 # set the start time for the attack display
                 attack_start_time = pg.time.get_ticks()
+
+        ## TIMER EVENT: OBSTACLE #######################################################
+        if event.type == obstacle_timer and not game_over:
+
+            # obstacle appear at random position
+            rand_position = randint(600, 1800)
+            obstacle_rect = enemy_01_surf.get_rect(bottomright=(rand_position, height-300))
+
+            # append obstacle only if
+            if not obstacle_rect_list:  # empty list
+                # print(f'list size = {len(obstacle_rect_list)}, empty list = {obstacle_rect_list}')  # for debug
+                obstacle_rect_list.append(obstacle_rect)
+            else:
+                # print(f'list size = {len(obstacle_rect_list)}, list = {obstacle_rect_list}') # for debug
+                obstacle_rect_list.append(obstacle_rect)
+                for obstacle in obstacle_rect_list:
+                    if obstacle.x < 0: obstacle_rect_list.remove(obstacle)
 
     # Game mode: game over
     if game_over:
@@ -109,13 +135,13 @@ while True:
     # Game mode: game active
     else:
 
-        ## DRAW BACKGROUND #################################################################
+        ## BACKGROUND ##################################################################
 
         # draw background
         screen.blit(sky_surf, (0, 0))  # (x, y) position
         screen.blit(ground_surf, (0, height - ground_rect.height))
 
-        ## MOUSE STATUS ####################################################################
+        ## MOUSE STATUS ################################################################
 
         # Get the position of the mouse
         mouse_pos = pg.mouse.get_pos()
@@ -131,7 +157,10 @@ while True:
         text_mouse_val = game_active_font.render(f"Mouse pressed: {mouse_val}", True, 'Black')
         screen.blit(text_mouse_val, (10, 50))
 
-        ## HERO MOVEMENT #################################################################
+        ## HERO MOVEMENT ###############################################################
+
+        # draw hero
+        screen.blit(hero_surf, hero_rect)
 
         # Get the state of the keyboard
         keys = pg.key.get_pressed()
@@ -166,9 +195,6 @@ while True:
         # draw jump action in screen
         screen.blit(text_action, (10, 90))
 
-        # draw hero
-        screen.blit(hero_surf, hero_rect)
-
         ## HERO ATTACK #####################################################################
 
         # draw the circle surface on top of the screen surface (after draw background)
@@ -199,8 +225,16 @@ while True:
 
         # draw enemy_02
         screen.blit(enemy_02_surf, enemy_02_rect)
+
+        # enemy_02 movement
         enemy_02_rect.left -= move_speed / 4  # slower than hero movement speed
         if enemy_02_rect.right < 0: enemy_02_rect.left = width
+
+        # draw obstacle and obstacle movement
+        if obstacle_rect_list:  # check if list is not empty
+            for obstacle_rect in obstacle_rect_list:
+                screen.blit(enemy_01_surf, obstacle_rect)
+                obstacle_rect.x -= move_speed
 
         ## COLLISION #######################################################################
 
