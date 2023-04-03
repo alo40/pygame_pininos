@@ -220,7 +220,7 @@ while True:
 
         ## ENEMIES MOVEMENT ################################################################
 
-        # # draw enemy_01 (to be used later)
+        # # draw enemy_01 (used as obstacle)
         # screen.blit(enemy_01_surf, enemy_01_rect)
 
         # draw enemy_02
@@ -238,11 +238,18 @@ while True:
 
         ## COLLISION #######################################################################
 
+        # hero collision with enemy_01 (obstacle)!
+        for obstacle_rect in obstacle_rect_list:
+            if hero_rect.colliderect(obstacle_rect):
+                text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
+                screen.blit(text_collision, (650, 10))
+                # game_over = True  # GAME OVER!
+
         # hero collision with enemy_02!
         if hero_rect.colliderect(enemy_02_rect):
             text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
             screen.blit(text_collision, (650, 10))
-            game_over = True  # GAME OVER!
+            # game_over = True  # GAME OVER!
 
         # hero collision with mouse!
         if hero_rect.collidepoint(mouse_pos):
