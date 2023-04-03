@@ -29,8 +29,7 @@ sky_surf = pg.Surface((width, height - ground_rect.height))
 sky_surf.fill((0, 255, 255))  # cyan
 
 # create hero surface/rectangle
-# hero_surf = pg.image.load('graphics/hero_200x300.xcf').convert_alpha()
-hero_surf = pg.image.load('graphics/soldier_256x256.png').convert_alpha()
+hero_surf = pg.image.load('graphics/soldier_simple.png').convert_alpha()
 hero_rect = hero_surf.get_rect(midbottom=(200, height - ground_rect.height))
 
 # create enemy_01 surface/rectangle
@@ -38,8 +37,7 @@ enemy_01_surf = pg.image.load('graphics/enemy_01.xcf').convert_alpha()
 enemy_01_rect = enemy_01_surf.get_rect(midbottom=(600, height - ground_rect.height))
 
 # create enemy_02 surface/rectangle
-# enemy_02_surf = pg.image.load('graphics/enemy_02.xcf').convert_alpha()
-enemy_02_surf = pg.image.load('graphics/ogre_ia_scaled.png').convert_alpha()
+enemy_02_surf = pg.image.load('graphics/ogre_ia_simple.png').convert_alpha()
 enemy_02_rect = enemy_02_surf.get_rect(midbottom=(1000, height - ground_rect.height))
 
 # create a surface to draw the attack on
