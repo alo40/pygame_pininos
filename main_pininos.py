@@ -59,7 +59,10 @@ pg.time.set_timer(obstacle_timer, 1000)  # tigger event in x ms
 
 # game parameters
 move_speed = 10  # overall movement speed
-jump_gravity = 10  # overall gravity (not realistic)
+gravity = 4  # overall gravity (not realistic)
+jump_velocity = 0
+jump_time = 0
+jump_y = 0
 game_over = False  # set to True for game over
 
 # hero actions (using Enum)
@@ -68,6 +71,7 @@ class action(Enum):
     JUMPING = 2
     FALLING = 3
 
+# hero action init
 hero_action = action.ON_GROUND
 
 # game loop
@@ -164,7 +168,7 @@ while True:
         text_mouse_val = game_active_font.render(f"Mouse pressed: {mouse_val}", True, 'Black')
         screen.blit(text_mouse_val, (10, 50))
 
-        ## HERO MOVEMENT ###############################################################
+        ## HERO MOVEMENT: LEFT/RIGHT ###################################################
 
         # draw hero
         screen.blit(hero_surf, hero_rect)
@@ -173,42 +177,63 @@ while True:
         keys = pg.key.get_pressed()
 
         # press keyboard left
-        if keys[pg.K_LEFT]:
+        if keys[pg.K_LEFT]:# and hero_action == action.ON_GROUND:
             hero_rect.x -= move_speed
 
         # press keyboard right
-        elif keys[pg.K_RIGHT]:
+        elif keys[pg.K_RIGHT]:# and hero_action == action.ON_GROUND:
             hero_rect.x += move_speed
 
         # reset position if screen limit is reached
         if hero_rect.left > width: hero_rect.right = 0  # redraw hero on left end
         if hero_rect.right < 0: hero_rect.left = width  # # redraw hero on right end
 
+        ## HERO MOVEMENT: JUMP #########################################################
+
         # press keyboard up
-        if keys[pg.K_UP]:
-            # if hero is jumping
-            if hero_action == action.JUMPING:
-                print('hero is jumping!')
-            else:
-                # jump action
-                text_action = game_active_font.render('Action mode: JUMP', False, 'Black')
-                hero_rect.y -= jump_gravity  # positive y-axis is facing down
-                hero_action = action.JUMPING
+        if keys[pg.K_UP] and hero_action == action.ON_GROUND:
+            jump_velocity = 40
+            jump_time = 0.8
+            hero_action = action.JUMPING
 
-        else:
-            # on ground action
-            text_action = game_active_font.render('Action mode: ON GROUND', False, 'Black')
-            if hero_rect.bottom >= height - ground_rect.height:
-                hero_rect.bottom = height - ground_rect.height
-                hero_action = action.ON_GROUND
-            else:
-                # falling action
-                text_action = game_active_font.render('Action mode: FALLING', False, 'Black')
-                hero_rect.y += 1.5 * jump_gravity
-                hero_action = action.FALLING
+        # jump gravity
+        jump_y = - jump_velocity * jump_time + 0.5 * gravity * jump_time ** 2
+        hero_rect.bottom = height - ground_rect.height + jump_y
 
-        # draw jump action in screen
-        screen.blit(text_action, (10, 90))
+        # update time
+        if jump_time > 0 and not hero_action == action.ON_GROUND:
+            jump_time += 0.8
+
+        # on ground action
+        if hero_rect.bottom >= height - ground_rect.height:
+            hero_rect.bottom = height - ground_rect.height
+            hero_action = action.ON_GROUND
+
+        # # falling action
+        # if hero_rect.bottom < height - ground_rect.height:
+        #     hero_action = action.FALLING
+
+        # if keys[pg.K_UP]:
+        #     # if hero is jumping
+        #     if hero_action == action.JUMPING or hero_action == action.FALLING:
+        #         print('hero is jumping or falling!')
+        #     else:
+        #         # jump action
+        #         text_action = game_active_font.render('Action mode: JUMP', False, 'Black')
+        #         hero_rect.y -= jump_gravity * 10  # positive y-axis is facing down
+        #         hero_action = action.JUMPING
+        #
+        # else:
+        #     # on ground action
+        #     text_action = game_active_font.render('Action mode: ON GROUND', False, 'Black')
+        #     if hero_rect.bottom >= height - ground_rect.height:
+        #         hero_rect.bottom = height - ground_rect.height
+        #         hero_action = action.ON_GROUND
+        #     else:
+        #         # falling action
+        #         text_action = game_active_font.render('Action mode: FALLING', False, 'Black')
+        #         hero_rect.y += 1.5 * jump_gravity
+        #         hero_action = action.FALLING
 
         ## HERO ATTACK #####################################################################
 
@@ -267,6 +292,10 @@ while True:
             screen.blit(text_collision, (650, 50))
 
     ## LOOP END ########################################################################
+
+    # draw hero action in screen
+    text_action = game_active_font.render(f'Action mode: {hero_action.name}', False, 'Black')
+    screen.blit(text_action, (10, 90))
 
     # update everything
     pg.display.update()
