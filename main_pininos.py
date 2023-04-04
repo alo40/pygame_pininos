@@ -129,6 +129,9 @@ while True:
         game_restart_rect = text_game_restart.get_rect(center=(width/2, (height/2)+100))
         screen.blit(text_game_restart, game_restart_rect)
 
+        # restart enemy_01 rectangle list
+        enemy_01_rect_list = []
+
         # Get the state of the keyboard
         keys = pg.key.get_pressed()
 
@@ -137,8 +140,13 @@ while True:
 
             # restart hero and enemies position
             hero_rect.x = 200
-            hero_rect.y = height - ground_rect.height
+            hero_rect.bottom = height - ground_rect.height
             enemy_02_rect.x = 1000
+
+            # restart jump parameters
+            jump_velocity = 0
+            jump_time = 0
+            jump_y = 0
 
             # restart game
             game_over = False
@@ -193,20 +201,21 @@ while True:
         # press keyboard up
         if keys[pg.K_UP] and hero_action == action.ON_GROUND:
             jump_velocity = 40
-            jump_time = 0.8
+            jump_time = 0.1  # initiate jump timer > 0
             hero_action = action.JUMPING
 
         # jump gravity
         jump_y = - jump_velocity * jump_time + 0.5 * gravity * jump_time ** 2
         hero_rect.bottom = height - ground_rect.height + jump_y
 
-        # update time
+        # update jump timer
         if jump_time > 0 and not hero_action == action.ON_GROUND:
-            jump_time += 0.8
+            jump_time += 0.5
 
         # on ground action
         if hero_rect.bottom >= height - ground_rect.height:
             hero_rect.bottom = height - ground_rect.height
+            jump_time = 0  # reset jump timer
             hero_action = action.ON_GROUND
 
         # # falling action
@@ -294,7 +303,7 @@ while True:
     ## LOOP END ########################################################################
 
     # draw hero action in screen
-    text_action = game_active_font.render(f'Action mode: {hero_action.name}', False, 'Black')
+    text_action = game_active_font.render(f'Action mode: {hero_action.name}, jump_time = {jump_time}', False, 'Black')
     screen.blit(text_action, (10, 90))
 
     # update everything
