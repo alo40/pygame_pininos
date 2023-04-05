@@ -62,8 +62,10 @@ move_speed = 10  # overall movement speed
 gravity = 10  # overall gravity (not realistic)
 jump_velocity = 0
 jump_time = 0
+jump_force = 0
 jump_y = 0
 game_over = False  # set to True for game over
+game_score = 0
 
 # hero actions (using Enum)
 class action(Enum):
@@ -148,6 +150,9 @@ while True:
             jump_time = 0
             jump_y = 0
 
+            # reset game score
+            game_score = 0
+
             # restart game
             game_over = False
 
@@ -198,11 +203,23 @@ while True:
 
         ## HERO MOVEMENT: JUMP #########################################################
 
-        # press keyboard up
+        # # press keyboard up
+        # if keys[pg.K_UP] and hero_action == action.ON_GROUND:
+        #     jump_velocity = 80
+        #     jump_time = 0.1  # initiate jump timer > 0
+        #     hero_action = action.JUMPING
+
+        # jump force
         if keys[pg.K_UP] and hero_action == action.ON_GROUND:
-            jump_velocity = 80
+            jump_force += 2  # force increase as long key held press
+            if jump_force > 80:
+                jump_force = 80  # max jump force
+
+        elif not hero_action == action.JUMPING:
+            jump_velocity = jump_force
             jump_time = 0.1  # initiate jump timer > 0
             hero_action = action.JUMPING
+            jump_force = 0  # reset after key release
 
         # jump gravity
         jump_y = - jump_velocity * jump_time + 0.5 * gravity * jump_time ** 2
@@ -261,7 +278,7 @@ while True:
             if hero_rect.colliderect(enemy_01_rect_index):
                 text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
                 screen.blit(text_collision, (650, 10))
-                game_over = True  # GAME OVER!
+                # game_over = True  # GAME OVER!
 
         # # hero collision with enemy_02!
         # if hero_rect.colliderect(enemy_02_rect):
@@ -274,15 +291,28 @@ while True:
         #     text_collision = game_active_font.render('Mouse collision!', False, 'Red')
         #     screen.blit(text_collision, (650, 50))
 
+    ## SCORE #######################################################################
+
+    if hero_rect.bottom < enemy_01_rect.top and hero_rect.x > enemy_01_rect.x:
+        game_score += 1
+
     ## LOOP END ########################################################################
 
     # print hero action on screen
     text_screen = game_active_font.render(f'Action mode: {hero_action.name}', False, 'Black')
     screen.blit(text_screen, (10, 10))
 
-    # print enemy_01 list on screen
-    text_screen = game_active_font.render(f'Enemy list: {len(enemy_01_rect_list)}', False, 'Black')
-    screen.blit(text_screen, (10, 40))
+    # print jump force list on screen
+    text_screen = game_active_font.render(f'JUMP force: {jump_force}', False, 'Black')
+    screen.blit(text_screen, (10, 50))
+
+    # print game score list on screen
+    text_screen = game_active_font.render(f'JUMP time: {jump_time}', False, 'Black')
+    screen.blit(text_screen, (10, 90))
+
+    # # print game score list on screen
+    # text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
+    # screen.blit(text_screen, (10, 90))
 
     # update everything
     pg.display.update()
