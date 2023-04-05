@@ -42,9 +42,9 @@ enemy_01_rect = enemy_01_surf.get_rect(midbottom=(600, height - ground_rect.heig
 # create enemy_01 rectangle list
 enemy_01_rect_list = []
 
-# create enemy_02 surface/rectangle
-enemy_02_surf = pg.image.load('graphics/ogre_ia_simple.png').convert_alpha()
-enemy_02_rect = enemy_02_surf.get_rect(midbottom=(1000, height - ground_rect.height))
+# # create enemy_02 surface/rectangle
+# enemy_02_surf = pg.image.load('graphics/ogre_ia_simple.png').convert_alpha()
+# enemy_02_rect = enemy_02_surf.get_rect(midbottom=(1000, height - ground_rect.height))
 
 # create a surface to draw the attack on
 attack_surf = pg.Surface((width, height), pg.SRCALPHA)
@@ -59,7 +59,7 @@ pg.time.set_timer(obstacle_timer, 1000)  # tigger event in x ms
 
 # game parameters
 move_speed = 10  # overall movement speed
-gravity = 4  # overall gravity (not realistic)
+gravity = 10  # overall gravity (not realistic)
 jump_velocity = 0
 jump_time = 0
 jump_y = 0
@@ -102,7 +102,7 @@ while True:
         if event.type == obstacle_timer and not game_over:
 
             # obstacle appear at random position
-            rand_position = randint(600, 1800)
+            rand_position = randint(1200, 1800)
             enemy_01_rect_index = enemy_01_surf.get_rect(bottomright=(rand_position, height - 300))
 
             # append obstacle only if
@@ -141,7 +141,7 @@ while True:
             # restart hero and enemies position
             hero_rect.x = 200
             hero_rect.bottom = height - ground_rect.height
-            enemy_02_rect.x = 1000
+            # enemy_02_rect.x = 1000
 
             # restart jump parameters
             jump_velocity = 0
@@ -162,19 +162,19 @@ while True:
 
         ## MOUSE STATUS ################################################################
 
-        # Get the position of the mouse
-        mouse_pos = pg.mouse.get_pos()
-
-        # Create a text surface with the mouse position
-        text_mouse_pos = game_active_font.render(f"Mouse position: {mouse_pos}", True, 'Black')
-        screen.blit(text_mouse_pos, (10, 10))
-
-        # Get the values of the mouse clicks
-        mouse_val = pg.mouse.get_pressed()
-
-        # Create a text surface with the mouse position
-        text_mouse_val = game_active_font.render(f"Mouse pressed: {mouse_val}", True, 'Black')
-        screen.blit(text_mouse_val, (10, 50))
+        # # Get the position of the mouse
+        # mouse_pos = pg.mouse.get_pos()
+        #
+        # # Create a text surface with the mouse position
+        # text_mouse_pos = game_active_font.render(f"Mouse position: {mouse_pos}", True, 'Black')
+        # screen.blit(text_mouse_pos, (10, 10))
+        #
+        # # Get the values of the mouse clicks
+        # mouse_val = pg.mouse.get_pressed()
+        #
+        # # Create a text surface with the mouse position
+        # text_mouse_val = game_active_font.render(f"Mouse pressed: {mouse_val}", True, 'Black')
+        # screen.blit(text_mouse_val, (10, 50))
 
         ## HERO MOVEMENT: LEFT/RIGHT ###################################################
 
@@ -200,7 +200,7 @@ while True:
 
         # press keyboard up
         if keys[pg.K_UP] and hero_action == action.ON_GROUND:
-            jump_velocity = 40
+            jump_velocity = 80
             jump_time = 0.1  # initiate jump timer > 0
             hero_action = action.JUMPING
 
@@ -218,32 +218,6 @@ while True:
             jump_time = 0  # reset jump timer
             hero_action = action.ON_GROUND
 
-        # # falling action
-        # if hero_rect.bottom < height - ground_rect.height:
-        #     hero_action = action.FALLING
-
-        # if keys[pg.K_UP]:
-        #     # if hero is jumping
-        #     if hero_action == action.JUMPING or hero_action == action.FALLING:
-        #         print('hero is jumping or falling!')
-        #     else:
-        #         # jump action
-        #         text_action = game_active_font.render('Action mode: JUMP', False, 'Black')
-        #         hero_rect.y -= jump_gravity * 10  # positive y-axis is facing down
-        #         hero_action = action.JUMPING
-        #
-        # else:
-        #     # on ground action
-        #     text_action = game_active_font.render('Action mode: ON GROUND', False, 'Black')
-        #     if hero_rect.bottom >= height - ground_rect.height:
-        #         hero_rect.bottom = height - ground_rect.height
-        #         hero_action = action.ON_GROUND
-        #     else:
-        #         # falling action
-        #         text_action = game_active_font.render('Action mode: FALLING', False, 'Black')
-        #         hero_rect.y += 1.5 * jump_gravity
-        #         hero_action = action.FALLING
-
         ## HERO ATTACK #####################################################################
 
         # draw the circle surface on top of the screen surface (after draw background)
@@ -257,15 +231,15 @@ while True:
             attack_start_time = 0
             attack_surf.fill((0, 0, 0, 0))
 
-        # Create a text surface with the mouse position (for testing only)
-        text_attack_time = game_active_font.render(f"attack_start_time: {attack_start_time}", True, 'Black')
-        screen.blit(text_attack_time, (1150, 10))
-        ###
-        text_attack_time = game_active_font.render(f"pg.time.get_ticks(): {pg.time.get_ticks()}", True, 'Black')
-        screen.blit(text_attack_time, (1150, 50))
-        ###
-        text_attack_time = game_active_font.render(f"attack_delta_time: {attack_delta_time}", True, 'Black')
-        screen.blit(text_attack_time, (1150, 90))
+        # # Create a text surface with the mouse position (for testing only)
+        # text_attack_time = game_active_font.render(f"attack_start_time: {attack_start_time}", True, 'Black')
+        # screen.blit(text_attack_time, (1150, 10))
+        # ###
+        # text_attack_time = game_active_font.render(f"pg.time.get_ticks(): {pg.time.get_ticks()}", True, 'Black')
+        # screen.blit(text_attack_time, (1150, 50))
+        # ###
+        # text_attack_time = game_active_font.render(f"attack_delta_time: {attack_delta_time}", True, 'Black')
+        # screen.blit(text_attack_time, (1150, 90))
 
         ## ENEMIES MOVEMENT ################################################################
 
@@ -275,10 +249,10 @@ while True:
                 screen.blit(enemy_01_surf, enemy_01_rect_index)
                 enemy_01_rect_index.x -= move_speed
 
-        # draw enemy_02 and movement
-        screen.blit(enemy_02_surf, enemy_02_rect)
-        enemy_02_rect.left -= move_speed / 4  # slower than hero movement speed
-        if enemy_02_rect.right < 0: enemy_02_rect.left = width
+        # # draw enemy_02 and movement
+        # screen.blit(enemy_02_surf, enemy_02_rect)
+        # enemy_02_rect.left -= move_speed / 4  # slower than hero movement speed
+        # if enemy_02_rect.right < 0: enemy_02_rect.left = width
 
         ## COLLISION #######################################################################
 
@@ -287,24 +261,28 @@ while True:
             if hero_rect.colliderect(enemy_01_rect_index):
                 text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
                 screen.blit(text_collision, (650, 10))
-                # game_over = True  # GAME OVER!
+                game_over = True  # GAME OVER!
 
-        # hero collision with enemy_02!
-        if hero_rect.colliderect(enemy_02_rect):
-            text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
-            screen.blit(text_collision, (650, 10))
-            # game_over = True  # GAME OVER!
+        # # hero collision with enemy_02!
+        # if hero_rect.colliderect(enemy_02_rect):
+        #     text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
+        #     screen.blit(text_collision, (650, 10))
+        #     # game_over = True  # GAME OVER!
 
-        # hero collision with mouse!
-        if hero_rect.collidepoint(mouse_pos):
-            text_collision = game_active_font.render('Mouse collision!', False, 'Red')
-            screen.blit(text_collision, (650, 50))
+        # # hero collision with mouse!
+        # if hero_rect.collidepoint(mouse_pos):
+        #     text_collision = game_active_font.render('Mouse collision!', False, 'Red')
+        #     screen.blit(text_collision, (650, 50))
 
     ## LOOP END ########################################################################
 
-    # draw hero action in screen
-    text_action = game_active_font.render(f'Action mode: {hero_action.name}, jump_time = {jump_time}', False, 'Black')
-    screen.blit(text_action, (10, 90))
+    # print hero action on screen
+    text_screen = game_active_font.render(f'Action mode: {hero_action.name}', False, 'Black')
+    screen.blit(text_screen, (10, 10))
+
+    # print enemy_01 list on screen
+    text_screen = game_active_font.render(f'Enemy list: {len(enemy_01_rect_list)}', False, 'Black')
+    screen.blit(text_screen, (10, 40))
 
     # update everything
     pg.display.update()
