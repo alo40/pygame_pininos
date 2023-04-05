@@ -104,8 +104,9 @@ while True:
         if event.type == obstacle_timer and not game_over:
 
             # obstacle appear at random position
-            rand_position = randint(1200, 1800)
-            enemy_01_rect_index = enemy_01_surf.get_rect(bottomright=(rand_position, height - 300))
+            rand_position_x = randint(1200, 1800)
+            rand_position_y = height - ground_rect.height - randint(0, 300)
+            enemy_01_rect_index = enemy_01_surf.get_rect(bottomright=(rand_position_x, rand_position_y))
 
             # append obstacle only if
             if not enemy_01_rect_list:  # empty list
@@ -211,7 +212,7 @@ while True:
 
         # jump force
         if keys[pg.K_UP] and hero_action == action.ON_GROUND:
-            jump_force += 2  # force increase as long key held press
+            jump_force += 3  # force increase as long key held press
             if jump_force > 80:
                 jump_force = 80  # max jump force
 
