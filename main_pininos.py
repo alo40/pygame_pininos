@@ -212,9 +212,9 @@ while True:
 
         # jump force
         if keys[pg.K_UP] and hero_action == action.ON_GROUND:
-            jump_force += 3  # force increase as long key held press
-            if jump_force > 80:
-                jump_force = 80  # max jump force
+            jump_force += 4  # force increase as long key held press
+            if jump_force > 100:
+                jump_force = 100  # max jump force
 
         elif not hero_action == action.JUMPING:
             jump_velocity = jump_force
@@ -296,6 +296,14 @@ while True:
 
     if hero_rect.bottom < enemy_01_rect.top and hero_rect.x > enemy_01_rect.x:
         game_score += 1
+
+    # Draw the horizontal lines of the grid
+    for y in range(0, height, 100):
+        pg.draw.line(screen, 'Black', (0, y), (width, y))
+
+    # Draw the vertical lines of the grid
+    for x in range(0, width, 100):
+        pg.draw.line(screen, 'Black', (x, 0), (x, height))
 
     ## LOOP END ########################################################################
 
