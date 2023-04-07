@@ -122,7 +122,8 @@ while True:
         ## TIMER EVENT: HERO STANDING ANIMATION ########################################
         if event.type == timer_hero_standing_animation \
                 and not game_over \
-                and hero_action == action.ON_GROUND:
+                and hero_action == action.ON_GROUND \
+                and jump_force == 0:  # to avoid conflict with crounch animtation
 
             # change hero_frame_index: from 0 to 1 or form 1 to 0
             hero_frame_index += 1
@@ -266,6 +267,10 @@ while True:
             if jump_force > 100:
                 jump_force = 100  # max jump force
 
+            # crounch animation
+            hero_frame_index = 2
+            hero_surf = hero_frames[hero_frame_index]
+
         elif not hero_action == action.JUMPING:
             jump_velocity = jump_force
             jump_timer = 0.1  # initiate jump timer > 0
@@ -292,21 +297,21 @@ while True:
         if hero_action == action.JUMPING:
             hero_frame_index = 3
 
-            # update enemy_01 surface
+            # update hero surface
             hero_surf = hero_frames[hero_frame_index]
 
         ## HERO ATTACK #################################################################
 
-        # draw the circle surface on top of the screen surface (after draw background)
-        screen.blit(attack_surf, (0, 0))
-
-        # check if the circle has been displayed for long enough
-        attack_delta_time = pg.time.get_ticks() - attack_start_time
-        if attack_start_time is not None and attack_delta_time >= attack_display_time:
-
-            # reset the start time and clear the circle surface
-            attack_start_time = 0
-            attack_surf.fill((0, 0, 0, 0))
+        # # draw the circle surface on top of the screen surface (after draw background)
+        # screen.blit(attack_surf, (0, 0))
+        #
+        # # check if the circle has been displayed for long enough
+        # attack_delta_time = pg.time.get_ticks() - attack_start_time
+        # if attack_start_time is not None and attack_delta_time >= attack_display_time:
+        #
+        #     # reset the start time and clear the circle surface
+        #     attack_start_time = 0
+        #     attack_surf.fill((0, 0, 0, 0))
 
         # # Create a text surface with the mouse position (for testing only)
         # text_attack_time = game_active_font.render(f"attack_start_time: {attack_start_time}", True, 'Black')
