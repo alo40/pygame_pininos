@@ -39,9 +39,13 @@ hero_frame5 = pg.image.load('graphics/soldier_simple_jumping4.png').convert_alph
 hero_frame6 = pg.image.load('graphics/soldier_simple_jumping5.png').convert_alpha()  # crounching
 hero_frame7 = pg.image.load('graphics/soldier_simple_jumping6.png').convert_alpha()  # crounching
 hero_frame8 = pg.image.load('graphics/soldier_simple_jumping7.png').convert_alpha()  # crounching
-hero_frame9 = pg.image.load('graphics/soldier_simple_jumping8.png').convert_alpha()  # jumping
+hero_frame9 = pg.image.load('graphics/soldier_simple_jumping8.png').convert_alpha()  # crounching
+hero_frame10 = pg.image.load('graphics/soldier_simple_jumping9.png').convert_alpha()  # crounching
+hero_frame11 = pg.image.load('graphics/soldier_simple_jumping10.png').convert_alpha()  # jumping
 hero_frames = [hero_frame1, hero_frame2,
-               hero_frame3, hero_frame4, hero_frame5, hero_frame6, hero_frame7, hero_frame8, hero_frame9]
+               hero_frame3, hero_frame4, hero_frame5, hero_frame6,
+               hero_frame7, hero_frame8, hero_frame9, hero_frame10,
+               hero_frame11]
 hero_frame_index = 0
 hero_surf = hero_frames[hero_frame_index]
 hero_rect = hero_surf.get_rect(midbottom=(200, screen_height - ground_rect.height))
@@ -280,6 +284,10 @@ while True:
                 hero_frame_index = 6
             elif jump_force < 60:
                 hero_frame_index = 7
+            elif jump_force < 70:
+                hero_frame_index = 8
+            elif jump_force < 80:
+                hero_frame_index = 9
             hero_surf = hero_frames[hero_frame_index]
 
         elif not hero_action == action.JUMPING:
@@ -303,7 +311,7 @@ while True:
             jump_timer += 0.5
 
             # jumping animation
-            hero_frame_index = 8
+            hero_frame_index = 10
             hero_surf = hero_frames[hero_frame_index]
 
         ## HERO ATTACK #################################################################
