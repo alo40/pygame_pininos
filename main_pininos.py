@@ -31,9 +31,11 @@ sky_surf = pg.Surface((screen_width, screen_height - ground_rect.height))
 sky_surf.fill('#EFBBEB')  # light purple
 
 # create hero surface/rectangle
-hero_frame1 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()
-hero_frame2 = pg.image.load('graphics/soldier_simple_standing2.png').convert_alpha()
-hero_frames = [hero_frame1, hero_frame2]
+hero_frame1 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()  # standing
+hero_frame2 = pg.image.load('graphics/soldier_simple_standing2.png').convert_alpha()  # standing
+hero_frame3 = pg.image.load('graphics/soldier_simple_jumping1.png').convert_alpha()  # jumping
+hero_frame4 = pg.image.load('graphics/soldier_simple_jumping2.png').convert_alpha()  # jumping
+hero_frames = [hero_frame1, hero_frame2, hero_frame3, hero_frame4]
 hero_frame_index = 0
 hero_surf = hero_frames[hero_frame_index]
 hero_rect = hero_surf.get_rect(midbottom=(200, screen_height - ground_rect.height))
@@ -118,14 +120,16 @@ while True:
                 attack_start_time = pg.time.get_ticks()
 
         ## TIMER EVENT: HERO STANDING ANIMATION ########################################
-        if event.type == timer_hero_standing_animation and not game_over:
+        if event.type == timer_hero_standing_animation \
+                and not game_over \
+                and hero_action == action.ON_GROUND:
 
-            # change enemy_01_frame_index: from 0 to 1 or form 1 to 0
+            # change hero_frame_index: from 0 to 1 or form 1 to 0
             hero_frame_index += 1
-            if hero_frame_index > len(hero_frames) - 1:
+            if hero_frame_index > 1:
                 hero_frame_index = 0
 
-            # update enemy_01 surface
+            # update hero surface
             hero_surf = hero_frames[hero_frame_index]
 
         ## TIMER EVENT: ENEMY_01 SPAWN #################################################
@@ -284,10 +288,12 @@ while True:
 
         ## HERO ANIMATION: JUMP ########################################################
 
-        # if keys[pg.K_SPACE] and hero_action == action.ON_GROUND:
-        #     print('animation!')
-        #     hero_surf = pg.transform.scale(hero_surf, (100, 100))
-        #     # hero_rect = hero_surf.get_rect(midbottom=(600, screen_height - ground_rect.height))
+        # change index if hero action jumping
+        if hero_action == action.JUMPING:
+            hero_frame_index = 3
+
+            # update enemy_01 surface
+            hero_surf = hero_frames[hero_frame_index]
 
         ## HERO ATTACK #################################################################
 
@@ -345,7 +351,7 @@ while True:
         #     text_collision = game_active_font.render('Mouse collision!', False, 'Red')
         #     screen.blit(text_collision, (650, 50))
 
-    ## SCORE #######################################################################
+    ## SCORE AND GRID LINES ############################################################
 
     # count game score
     if hero_rect.bottom < enemy_01_rect.top and hero_rect.x > enemy_01_rect.x:
