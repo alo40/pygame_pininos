@@ -35,8 +35,10 @@ hero_frame1 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alp
 hero_frame2 = pg.image.load('graphics/soldier_simple_standing2.png').convert_alpha()  # standing
 hero_frame3 = pg.image.load('graphics/soldier_simple_jumping2.png').convert_alpha()  # crounching
 hero_frame4 = pg.image.load('graphics/soldier_simple_jumping3.png').convert_alpha()  # crounching
-hero_frame5 = pg.image.load('graphics/soldier_simple_jumping4.png').convert_alpha()  # jumping
-hero_frames = [hero_frame1, hero_frame2, hero_frame3, hero_frame4, hero_frame5]
+hero_frame5 = pg.image.load('graphics/soldier_simple_jumping4.png').convert_alpha()  # crounching
+hero_frame6 = pg.image.load('graphics/soldier_simple_jumping5.png').convert_alpha()  # crounching
+hero_frame7 = pg.image.load('graphics/soldier_simple_jumping6.png').convert_alpha()  # jumping
+hero_frames = [hero_frame1, hero_frame2, hero_frame3, hero_frame4, hero_frame5, hero_frame6, hero_frame7]
 hero_frame_index = 0
 hero_surf = hero_frames[hero_frame_index]
 hero_rect = hero_surf.get_rect(midbottom=(200, screen_height - ground_rect.height))
@@ -258,17 +260,20 @@ while True:
 
         # jump force
         if keys[pg.K_DOWN] and hero_action == action.ON_GROUND:
-            jump_force += 2  # force increase as long key held press
+            jump_force += 3  # force increase as long key held press
             if jump_force > 100:
                 jump_force = 100  # max jump force
 
             # crounching animation
-            if jump_force < 50:
+            if jump_force < 25:
                 hero_frame_index = 2
-                hero_surf = hero_frames[hero_frame_index]
-            else:
+            elif jump_force < 50:
                 hero_frame_index = 3
-                hero_surf = hero_frames[hero_frame_index]
+            elif jump_force < 75:
+                hero_frame_index = 4
+            elif jump_force < 100:
+                hero_frame_index = 5
+            hero_surf = hero_frames[hero_frame_index]
 
         elif not hero_action == action.JUMPING:
             jump_velocity = jump_force
@@ -291,7 +296,7 @@ while True:
             jump_timer += 0.5
 
             # jumping animation
-            hero_frame_index = 4
+            hero_frame_index = 6
             hero_surf = hero_frames[hero_frame_index]
 
         ## HERO ANIMATION: JUMP ########################################################
