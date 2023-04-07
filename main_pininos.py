@@ -31,8 +31,11 @@ sky_surf = pg.Surface((screen_width, screen_height - ground_rect.height))
 sky_surf.fill('#EFBBEB')  # light purple
 
 # create hero surface/rectangle
-hero_surf = pg.image.load('graphics/soldier_simple.png').convert_alpha()
-hero_surf = pg.transform.scale(hero_surf, (100, 200))
+hero_frame1 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()
+hero_frame2 = pg.image.load('graphics/soldier_simple_standing2.png').convert_alpha()
+hero_frames = [hero_frame1, hero_frame2]
+hero_frame_index = 0
+hero_surf = hero_frames[hero_frame_index]
 hero_rect = hero_surf.get_rect(midbottom=(200, screen_height - ground_rect.height))
 
 # create enemy_01 surface/rectangle
@@ -59,12 +62,16 @@ attack_surf = pg.Surface((screen_width, screen_height), pg.SRCALPHA)
 attack_display_time = 2000  # in milliseconds
 attack_start_time = 0
 
+# timers hero standing animation
+timer_hero_standing_animation = pg.USEREVENT + 1  # + 2 is used to avoid conflicts with pygame user events
+pg.time.set_timer(timer_hero_standing_animation, 200)  # tigger event in x ms
+
 # timers enemy_01 spawn
-timer_enemy_01_spawn = pg.USEREVENT + 1  # + 1 is used to avoid conflicts with pygame user events
+timer_enemy_01_spawn = pg.USEREVENT + 2  # + 1 is used to avoid conflicts with pygame user events
 pg.time.set_timer(timer_enemy_01_spawn, 1000)  # tigger event in x ms
 
 # timers enemy_01 animation
-timer_enemy_01_animation = pg.USEREVENT + 2  # + 2 is used to avoid conflicts with pygame user events
+timer_enemy_01_animation = pg.USEREVENT + 3  # + 2 is used to avoid conflicts with pygame user events
 pg.time.set_timer(timer_enemy_01_animation, 200)  # tigger event in x ms
 
 # game parameters
@@ -109,6 +116,17 @@ while True:
 
                 # set the start time for the attack display
                 attack_start_time = pg.time.get_ticks()
+
+        ## TIMER EVENT: HERO STANDING ANIMATION ########################################
+        if event.type == timer_hero_standing_animation and not game_over:
+
+            # change enemy_01_frame_index: from 0 to 1 or form 1 to 0
+            hero_frame_index += 1
+            if hero_frame_index > len(hero_frames) - 1:
+                hero_frame_index = 0
+
+            # update enemy_01 surface
+            hero_surf = hero_frames[hero_frame_index]
 
         ## TIMER EVENT: ENEMY_01 SPAWN #################################################
         if event.type == timer_enemy_01_spawn and not game_over:
