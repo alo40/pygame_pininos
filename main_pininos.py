@@ -33,9 +33,10 @@ sky_surf.fill('#EFBBEB')  # light purple
 # create hero surface/rectangle
 hero_frame1 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()  # standing
 hero_frame2 = pg.image.load('graphics/soldier_simple_standing2.png').convert_alpha()  # standing
-hero_frame3 = pg.image.load('graphics/soldier_simple_jumping1.png').convert_alpha()  # jumping
-hero_frame4 = pg.image.load('graphics/soldier_simple_jumping2.png').convert_alpha()  # jumping
-hero_frames = [hero_frame1, hero_frame2, hero_frame3, hero_frame4]
+hero_frame3 = pg.image.load('graphics/soldier_simple_jumping2.png').convert_alpha()  # crounching
+hero_frame4 = pg.image.load('graphics/soldier_simple_jumping3.png').convert_alpha()  # crounching
+hero_frame5 = pg.image.load('graphics/soldier_simple_jumping4.png').convert_alpha()  # jumping
+hero_frames = [hero_frame1, hero_frame2, hero_frame3, hero_frame4, hero_frame5]
 hero_frame_index = 0
 hero_surf = hero_frames[hero_frame_index]
 hero_rect = hero_surf.get_rect(midbottom=(200, screen_height - ground_rect.height))
@@ -255,21 +256,19 @@ while True:
 
         ## HERO MOVEMENT: JUMP #########################################################
 
-        # # press keyboard up
-        # if keys[pg.K_UP] and hero_action == action.ON_GROUND:
-        #     jump_velocity = 80
-        #     jump_time = 0.1  # initiate jump timer > 0
-        #     hero_action = action.JUMPING
-
         # jump force
-        if keys[pg.K_UP] and hero_action == action.ON_GROUND:
+        if keys[pg.K_DOWN] and hero_action == action.ON_GROUND:
             jump_force += 2  # force increase as long key held press
             if jump_force > 100:
                 jump_force = 100  # max jump force
 
-            # crounch animation
-            hero_frame_index = 2
-            hero_surf = hero_frames[hero_frame_index]
+            # crounching animation
+            if jump_force < 50:
+                hero_frame_index = 2
+                hero_surf = hero_frames[hero_frame_index]
+            else:
+                hero_frame_index = 3
+                hero_surf = hero_frames[hero_frame_index]
 
         elif not hero_action == action.JUMPING:
             jump_velocity = jump_force
@@ -281,24 +280,28 @@ while True:
         jump_y = - jump_velocity * jump_timer + 0.5 * gravity * jump_timer ** 2
         hero_rect.bottom = screen_height - ground_rect.height + jump_y
 
-        # update jump timer
-        if jump_timer > 0 and not hero_action == action.ON_GROUND:
-            jump_timer += 0.5
-
         # on ground action
         if hero_rect.bottom >= screen_height - ground_rect.height:
             hero_rect.bottom = screen_height - ground_rect.height
             jump_timer = 0  # reset jump timer
             hero_action = action.ON_GROUND
 
+        # update jump timer
+        if jump_timer > 0 and hero_action == action.JUMPING:
+            jump_timer += 0.5
+
+            # jumping animation
+            hero_frame_index = 4
+            hero_surf = hero_frames[hero_frame_index]
+
         ## HERO ANIMATION: JUMP ########################################################
 
-        # change index if hero action jumping
-        if hero_action == action.JUMPING:
-            hero_frame_index = 3
-
-            # update hero surface
-            hero_surf = hero_frames[hero_frame_index]
+        # # change index if hero action jumping
+        # if hero_action == action.JUMPING:
+        #     hero_frame_index = 4
+        #
+        #     # update hero surface
+        #     hero_surf = hero_frames[hero_frame_index]
 
         ## HERO ATTACK #################################################################
 
