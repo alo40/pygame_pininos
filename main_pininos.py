@@ -3,6 +3,128 @@ from sys import exit
 from random import randint
 from enum import Enum
 
+class Hero(pg.sprite.Sprite):
+
+    def __init__(self):
+        super().__init__()
+
+        # parameters
+        self.jump_force = 0
+        self.jump_force_max = 100
+        self.jump_timer = 0
+        self.jump_velocity = 0
+        self.jump_pixel = 0
+        self.action = action.ON_GROUND
+
+        # standing frames
+        stand_01 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()
+        stand_02 = pg.image.load('graphics/soldier_simple_standing2.png').convert_alpha()
+        stand_03 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()
+        stand_04 = stand_02
+        standing_frames = [stand_01, stand_02, stand_03, stand_04]
+
+        # crouching frames
+        crouch_01 = pg.image.load('graphics/soldier_simple_jumping2.png').convert_alpha()
+        crouch_02 = pg.image.load('graphics/soldier_simple_jumping3.png').convert_alpha()
+        crouch_03 = pg.image.load('graphics/soldier_simple_jumping4.png').convert_alpha()
+        crouch_04 = pg.image.load('graphics/soldier_simple_jumping5.png').convert_alpha()
+        crouch_05 = pg.image.load('graphics/soldier_simple_jumping6.png').convert_alpha()
+        crouch_06 = pg.image.load('graphics/soldier_simple_jumping7.png').convert_alpha()
+        crouch_07 = pg.image.load('graphics/soldier_simple_jumping8.png').convert_alpha()
+        crouch_08 = pg.image.load('graphics/soldier_simple_jumping9.png').convert_alpha()
+        crouching_frames = [crouch_01, crouch_02, crouch_03, crouch_04,
+                            crouch_05, crouch_06, crouch_07, crouch_08]
+
+        # jumping frames
+        jump_01 = pg.image.load('graphics/soldier_simple_jumping10.png').convert_alpha()  # jumping
+        jumping_frames = [jump_01]
+
+        self.frames = standing_frames + crouching_frames + jumping_frames
+        self.frame_index = 0
+        self.image = self.frames[self.frame_index]
+
+        self.image = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()
+        self.rect = self.image.get_rect(midbottom=(200, screen_height - ground_rect.height))
+
+    # def animation(self):
+    #     self.frame_index = 0
+    #     self.image = self.frames[self.frame_index]
+
+    def update(self):
+        # self.standing()
+        self.walking()
+        self.jumping()
+
+    def standing(self):
+
+        # animation
+        self.frame_index += 1
+        if self.frame_index > 3:
+            self.frame_index = 0
+        self.image = self.frames[self.frame_index]
+
+    def walking(self):
+
+        global screen_width, screen_height
+
+        # get key
+        keys = pg.key.get_pressed()
+
+        # press keyboard left
+        if keys[pg.K_LEFT]:
+            self.rect.x -= move_speed
+
+        # press keyboard right
+        elif keys[pg.K_RIGHT]:
+            self.rect.x += move_speed
+
+        # reset position if screen limit is reached
+        if self.rect.left > screen_width: self.rect.right = 0  # redraw hero on left end
+        if self.rect.right < 0: self.rect.left = screen_width  # # redraw hero on right end
+
+    def jumping(self):
+
+        # get key
+        keys = pg.key.get_pressed()
+
+        # jump force
+        if keys[pg.K_DOWN] and self.action == action.ON_GROUND:
+            self.jump_force += 2  # force increase as long key held press
+            if self.jump_force > self.jump_force_max:
+                self.jump_force = self.jump_force_max
+
+            # crouching animation
+            self.frame_index = int(self.jump_force/self.jump_force_max * 8) + 3
+            self.image = self.frames[self.frame_index]
+            print(f'{self.frame_index}')
+
+        elif not self.action == action.JUMPING:
+            self.jump_velocity = self.jump_force
+            self.jump_timer = 0.1  # initiate jump timer > 0
+            self.action = action.JUMPING
+            self.jump_force = 0  # reset after key release
+
+        else:
+            # jumping animation
+            self.frame_index = 12
+            self.image = self.frames[self.frame_index]
+
+        # update jump timer
+        if self.jump_timer > 0 and self.action == action.JUMPING:
+            self.jump_timer += 0.5
+
+        # jump in pixels
+        self.jump_pixel = - self.jump_velocity * self.jump_timer + 0.5 * gravity * self.jump_timer ** 2
+        self.rect.bottom = screen_height - ground_rect.height + self.jump_pixel
+
+        # on ground action
+        if self.rect.bottom >= screen_height - ground_rect.height:
+            self.rect.bottom = screen_height - ground_rect.height
+            self.jump_timer = 0  # reset jump timer
+            self.action = action.ON_GROUND
+
+
+
 # game init
 pg.init()
 
@@ -72,9 +194,9 @@ enemy_01_rect_list = []
 # create a surface to draw the attack on
 attack_surf = pg.Surface((screen_width, screen_height), pg.SRCALPHA)
 
-# set the time to display the attack
-attack_display_time = 2000  # in milliseconds
-attack_start_time = 0
+# # set the time to display the attack
+# attack_display_time = 2000  # in milliseconds
+# attack_start_time = 0
 
 # timers hero standing animation
 timer_hero_standing_animation = pg.USEREVENT + 1  # + 2 is used to avoid conflicts with pygame user events
@@ -103,6 +225,10 @@ class action(Enum):
     ON_GROUND = 1
     JUMPING = 2
     FALLING = 3
+
+# declare hero
+hero = pg.sprite.GroupSingle()
+hero.add(Hero())
 
 # hero action init
 hero_action = action.ON_GROUND
@@ -144,6 +270,9 @@ while True:
 
             # update hero surface
             hero_surf = hero_frames[hero_frame_index]
+
+            # update hero image
+            hero.sprite.standing()
 
         ## TIMER EVENT: ENEMY_01 SPAWN #################################################
         if event.type == timer_enemy_01_spawn and not game_over:
@@ -249,6 +378,10 @@ while True:
 
         # draw hero
         screen.blit(hero_surf, hero_rect)
+
+        # draw second hero using sprites
+        hero.draw(screen)
+        hero.update()
 
         # Get the state of the keyboard
         keys = pg.key.get_pressed()
@@ -389,15 +522,15 @@ while True:
     ## LOOP END ########################################################################
 
     # print hero action on screen
-    text_screen = game_active_font.render(f'Action mode: {hero_action.name}', False, 'Black')
+    text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
     screen.blit(text_screen, (10, 10))
 
     # print jump force list on screen
-    text_screen = game_active_font.render(f'JUMP force: {jump_force}', False, 'Black')
+    text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
     screen.blit(text_screen, (10, 50))
 
     # print game score list on screen
-    text_screen = game_active_font.render(f'JUMP timer: {jump_timer}', False, 'Black')
+    text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
     screen.blit(text_screen, (10, 90))
 
     # # print game score list on screen
