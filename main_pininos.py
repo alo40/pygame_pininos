@@ -9,11 +9,13 @@ class Hero(pg.sprite.Sprite):
         super().__init__()
 
         # parameters
+        self.move_speed = 10
         self.jump_force = 0
         self.jump_force_max = 100
         self.jump_timer = 0
         self.jump_velocity = 0
         self.jump_pixel = 0
+        self.gravity = 10
         self.action = action.ON_GROUND
 
         # standing frames
@@ -65,18 +67,18 @@ class Hero(pg.sprite.Sprite):
 
     def walking(self):
 
-        global screen_width, screen_height
+        # global screen_width, screen_height
 
         # get key
         keys = pg.key.get_pressed()
 
         # press keyboard left
         if keys[pg.K_LEFT]:
-            self.rect.x -= move_speed
+            self.rect.x -= self.move_speed
 
         # press keyboard right
         elif keys[pg.K_RIGHT]:
-            self.rect.x += move_speed
+            self.rect.x += self.move_speed
 
         # reset position if screen limit is reached
         if self.rect.left > screen_width: self.rect.right = 0  # redraw hero on left end
@@ -89,7 +91,7 @@ class Hero(pg.sprite.Sprite):
 
         # jump force
         if keys[pg.K_DOWN] and self.action == action.ON_GROUND:
-            self.jump_force += 2  # force increase as long key held press
+            self.jump_force += 4  # force increase as long key held press
             if self.jump_force > self.jump_force_max:
                 self.jump_force = self.jump_force_max
 
@@ -114,7 +116,7 @@ class Hero(pg.sprite.Sprite):
             self.jump_timer += 0.5
 
         # jump in pixels
-        self.jump_pixel = - self.jump_velocity * self.jump_timer + 0.5 * gravity * self.jump_timer ** 2
+        self.jump_pixel = - self.jump_velocity * self.jump_timer + 0.5 * self.gravity * self.jump_timer ** 2
         self.rect.bottom = screen_height - ground_rect.height + self.jump_pixel
 
         # on ground action
@@ -124,9 +126,18 @@ class Hero(pg.sprite.Sprite):
             self.action = action.ON_GROUND
 
 
+# hero actions (using Enum)
+class action(Enum):
+    ON_GROUND = 1
+    JUMPING = 2
+    # FALLING = 3
+
 
 # game init
 pg.init()
+
+# set to True for game over / False for game active
+game_over = False
 
 # screen setup
 screen_width = 1600
@@ -148,31 +159,38 @@ ground_surf = pg.image.load('graphics/ground_1600x200.png').convert()
 ground_rect = ground_surf.get_rect(bottomleft=(0, screen_height))
 
 # create sky surface
-# sky_surface = pg.image.load('graphics/sky.png')
 sky_surf = pg.Surface((screen_width, screen_height - ground_rect.height))
 sky_surf.fill('#EFBBEB')  # light purple
 
-# create hero surface/rectangle
-hero_frame0 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()  # standing
-hero_frame1 = pg.image.load('graphics/soldier_simple_standing2.png').convert_alpha()  # standing
-hero_frame2 = pg.image.load('graphics/soldier_simple_standing3.png').convert_alpha()  # standing
-hero_frame3 = pg.image.load('graphics/soldier_simple_standing2.png').convert_alpha()  # standing
-hero_frame4 = pg.image.load('graphics/soldier_simple_jumping2.png').convert_alpha()  # crounching
-hero_frame5 = pg.image.load('graphics/soldier_simple_jumping3.png').convert_alpha()  # crounching
-hero_frame6 = pg.image.load('graphics/soldier_simple_jumping4.png').convert_alpha()  # crounching
-hero_frame7 = pg.image.load('graphics/soldier_simple_jumping5.png').convert_alpha()  # crounching
-hero_frame8 = pg.image.load('graphics/soldier_simple_jumping6.png').convert_alpha()  # crounching
-hero_frame9 = pg.image.load('graphics/soldier_simple_jumping7.png').convert_alpha()  # crounching
-hero_frame10 = pg.image.load('graphics/soldier_simple_jumping8.png').convert_alpha()  # crounching
-hero_frame11 = pg.image.load('graphics/soldier_simple_jumping9.png').convert_alpha()  # crounching
-hero_frame12 = pg.image.load('graphics/soldier_simple_jumping10.png').convert_alpha()  # jumping
-hero_frames = [hero_frame0, hero_frame1, hero_frame2, hero_frame3,  # standing
-               hero_frame4, hero_frame5, hero_frame6, hero_frame7,  # crounching
-               hero_frame8, hero_frame9, hero_frame10, hero_frame11,  # crounching
-               hero_frame12]  # jumping
-hero_frame_index = 0
-hero_surf = hero_frames[hero_frame_index]
-hero_rect = hero_surf.get_rect(midbottom=(200, screen_height - ground_rect.height))
+# declare hero
+hero = pg.sprite.GroupSingle()
+hero.add(Hero())
+
+# hero action init
+hero_action = action.ON_GROUND
+
+
+# # create hero surface/rectangle
+# hero_frame0 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()  # standing
+# hero_frame1 = pg.image.load('graphics/soldier_simple_standing2.png').convert_alpha()  # standing
+# hero_frame2 = pg.image.load('graphics/soldier_simple_standing3.png').convert_alpha()  # standing
+# hero_frame3 = pg.image.load('graphics/soldier_simple_standing2.png').convert_alpha()  # standing
+# hero_frame4 = pg.image.load('graphics/soldier_simple_jumping2.png').convert_alpha()  # crounching
+# hero_frame5 = pg.image.load('graphics/soldier_simple_jumping3.png').convert_alpha()  # crounching
+# hero_frame6 = pg.image.load('graphics/soldier_simple_jumping4.png').convert_alpha()  # crounching
+# hero_frame7 = pg.image.load('graphics/soldier_simple_jumping5.png').convert_alpha()  # crounching
+# hero_frame8 = pg.image.load('graphics/soldier_simple_jumping6.png').convert_alpha()  # crounching
+# hero_frame9 = pg.image.load('graphics/soldier_simple_jumping7.png').convert_alpha()  # crounching
+# hero_frame10 = pg.image.load('graphics/soldier_simple_jumping8.png').convert_alpha()  # crounching
+# hero_frame11 = pg.image.load('graphics/soldier_simple_jumping9.png').convert_alpha()  # crounching
+# hero_frame12 = pg.image.load('graphics/soldier_simple_jumping10.png').convert_alpha()  # jumping
+# hero_frames = [hero_frame0, hero_frame1, hero_frame2, hero_frame3,  # standing
+#                hero_frame4, hero_frame5, hero_frame6, hero_frame7,  # crounching
+#                hero_frame8, hero_frame9, hero_frame10, hero_frame11,  # crounching
+#                hero_frame12]  # jumping
+# hero_frame_index = 0
+# hero_surf = hero_frames[hero_frame_index]
+# hero_rect = hero_surf.get_rect(midbottom=(200, screen_height - ground_rect.height))
 
 # create enemy_01 surface/rectangle
 enemy_01_frame1 = pg.image.load('graphics/eye_sprite1.png').convert_alpha()
@@ -191,8 +209,8 @@ enemy_01_rect_list = []
 # enemy_02_surf = pg.image.load('graphics/ogre_ia_simple.png').convert_alpha()
 # enemy_02_rect = enemy_02_surf.get_rect(midbottom=(1000, height - ground_rect.height))
 
-# create a surface to draw the attack on
-attack_surf = pg.Surface((screen_width, screen_height), pg.SRCALPHA)
+# # create a surface to draw the attack on
+# attack_surf = pg.Surface((screen_width, screen_height), pg.SRCALPHA)
 
 # # set the time to display the attack
 # attack_display_time = 2000  # in milliseconds
@@ -210,28 +228,15 @@ pg.time.set_timer(timer_enemy_01_spawn, 1000)  # tigger event in x ms
 timer_enemy_01_animation = pg.USEREVENT + 3  # + 2 is used to avoid conflicts with pygame user events
 pg.time.set_timer(timer_enemy_01_animation, 200)  # tigger event in x ms
 
-# game parameters
+# # game parameters
 move_speed = 10  # overall movement speed
-gravity = 10  # overall gravity (not realistic)
-jump_velocity = 0
-jump_timer = 0
-jump_force = 0
-jump_y = 0
-game_over = False  # set to True for game over
-game_score = 0
+# gravity = 10  # overall gravity (not realistic)
+# jump_velocity = 0
+# jump_timer = 0
+# jump_force = 0
+# jump_y = 0
+# game_score = 0
 
-# hero actions (using Enum)
-class action(Enum):
-    ON_GROUND = 1
-    JUMPING = 2
-    FALLING = 3
-
-# declare hero
-hero = pg.sprite.GroupSingle()
-hero.add(Hero())
-
-# hero action init
-hero_action = action.ON_GROUND
 
 # game loop
 while True:
@@ -244,32 +249,32 @@ while True:
             pg.quit()
             exit()  # to close the while: True loop
 
-        ## EVENT: HERO ATTACK ##########################################################
-        elif event.type == pg.MOUSEBUTTONDOWN:
-            if event.button == 1:  # left mouse button
-
-                # get the position of the mouse click
-                mouse_pos = pg.mouse.get_pos()
-
-                # draw the attack on the attack surface at the mouse position
-                pg.draw.circle(attack_surf, 'Red', mouse_pos, 10)
-
-                # set the start time for the attack display
-                attack_start_time = pg.time.get_ticks()
+        # ## EVENT: HERO ATTACK ##########################################################
+        # elif event.type == pg.MOUSEBUTTONDOWN:
+        #     if event.button == 1:  # left mouse button
+        #
+        #         # get the position of the mouse click
+        #         mouse_pos = pg.mouse.get_pos()
+        #
+        #         # draw the attack on the attack surface at the mouse position
+        #         pg.draw.circle(attack_surf, 'Red', mouse_pos, 10)
+        #
+        #         # set the start time for the attack display
+        #         attack_start_time = pg.time.get_ticks()
 
         ## TIMER EVENT: HERO STANDING ANIMATION ########################################
         if event.type == timer_hero_standing_animation \
                 and not game_over \
-                and hero_action == action.ON_GROUND \
-                and jump_force == 0:  # to avoid conflict with crounch animtation
+                and hero.sprite.action == action.ON_GROUND \
+                and hero.sprite.jump_force == 0:  # to avoid conflict with crounch animtation
 
-            # change hero_frame_index: from 0 to 1 or form 1 to 0
-            hero_frame_index += 1
-            if hero_frame_index > 3:
-                hero_frame_index = 0
-
-            # update hero surface
-            hero_surf = hero_frames[hero_frame_index]
+            # # change hero_frame_index: from 0 to 1 or form 1 to 0
+            # hero_frame_index += 1
+            # if hero_frame_index > 3:
+            #     hero_frame_index = 0
+            #
+            # # update hero surface
+            # hero_surf = hero_frames[hero_frame_index]
 
             # update hero image
             hero.sprite.standing()
@@ -332,14 +337,14 @@ while True:
         if keys[pg.K_SPACE]:
 
             # restart hero and enemies position
-            hero_rect.x = 200
-            hero_rect.bottom = screen_height - ground_rect.height
+            hero.rect.x = 200
+            hero.rect.bottom = screen_height - ground_rect.height
             # enemy_02_rect.x = 1000
 
             # restart jump parameters
-            jump_velocity = 0
-            jump_timer = 0
-            jump_y = 0
+            hero.jump_velocity = 0
+            hero.jump_timer = 0
+            hero.jump_pixel = 0
 
             # reset game score
             game_score = 0
@@ -376,78 +381,78 @@ while True:
 
         ## HERO MOVEMENT: LEFT/RIGHT ###################################################
 
-        # draw hero
-        screen.blit(hero_surf, hero_rect)
+        # # draw hero
+        # screen.blit(hero_surf, hero_rect)
 
         # draw second hero using sprites
         hero.draw(screen)
         hero.update()
 
-        # Get the state of the keyboard
-        keys = pg.key.get_pressed()
-
-        # press keyboard left
-        if keys[pg.K_LEFT]:# and hero_action == action.ON_GROUND:
-            hero_rect.x -= move_speed
-
-        # press keyboard right
-        elif keys[pg.K_RIGHT]:# and hero_action == action.ON_GROUND:
-            hero_rect.x += move_speed
-
-        # reset position if screen limit is reached
-        if hero_rect.left > screen_width: hero_rect.right = 0  # redraw hero on left end
-        if hero_rect.right < 0: hero_rect.left = screen_width  # # redraw hero on right end
+        # # Get the state of the keyboard
+        # keys = pg.key.get_pressed()
+        #
+        # # press keyboard left
+        # if keys[pg.K_LEFT]:# and hero_action == action.ON_GROUND:
+        #     hero_rect.x -= move_speed
+        #
+        # # press keyboard right
+        # elif keys[pg.K_RIGHT]:# and hero_action == action.ON_GROUND:
+        #     hero_rect.x += move_speed
+        #
+        # # reset position if screen limit is reached
+        # if hero_rect.left > screen_width: hero_rect.right = 0  # redraw hero on left end
+        # if hero_rect.right < 0: hero_rect.left = screen_width  # # redraw hero on right end
 
         ## HERO MOVEMENT: JUMP #########################################################
 
-        # jump force
-        if keys[pg.K_DOWN] and hero_action == action.ON_GROUND:
-            jump_force += 3  # force increase as long key held press
-            if jump_force > 100:
-                jump_force = 100  # max jump force
-
-            # crounching animation
-            if jump_force < 10:
-                hero_frame_index = 4
-            elif jump_force < 20:
-                hero_frame_index = 5
-            elif jump_force < 30:
-                hero_frame_index = 6
-            elif jump_force < 40:
-                hero_frame_index = 7
-            elif jump_force < 50:
-                hero_frame_index = 8
-            elif jump_force < 60:
-                hero_frame_index = 9
-            elif jump_force < 70:
-                hero_frame_index = 10
-            elif jump_force < 80:
-                hero_frame_index = 11
-            hero_surf = hero_frames[hero_frame_index]
-
-        elif not hero_action == action.JUMPING:
-            jump_velocity = jump_force
-            jump_timer = 0.1  # initiate jump timer > 0
-            hero_action = action.JUMPING
-            jump_force = 0  # reset after key release
-
-        # jump gravity
-        jump_y = - jump_velocity * jump_timer + 0.5 * gravity * jump_timer ** 2
-        hero_rect.bottom = screen_height - ground_rect.height + jump_y
-
-        # on ground action
-        if hero_rect.bottom >= screen_height - ground_rect.height:
-            hero_rect.bottom = screen_height - ground_rect.height
-            jump_timer = 0  # reset jump timer
-            hero_action = action.ON_GROUND
-
-        # update jump timer
-        if jump_timer > 0 and hero_action == action.JUMPING:
-            jump_timer += 0.5
-
-            # jumping animation
-            hero_frame_index = 12
-            hero_surf = hero_frames[hero_frame_index]
+        # # jump force
+        # if keys[pg.K_DOWN] and hero_action == action.ON_GROUND:
+        #     jump_force += 3  # force increase as long key held press
+        #     if jump_force > 100:
+        #         jump_force = 100  # max jump force
+        #
+        #     # crounching animation
+        #     if jump_force < 10:
+        #         hero_frame_index = 4
+        #     elif jump_force < 20:
+        #         hero_frame_index = 5
+        #     elif jump_force < 30:
+        #         hero_frame_index = 6
+        #     elif jump_force < 40:
+        #         hero_frame_index = 7
+        #     elif jump_force < 50:
+        #         hero_frame_index = 8
+        #     elif jump_force < 60:
+        #         hero_frame_index = 9
+        #     elif jump_force < 70:
+        #         hero_frame_index = 10
+        #     elif jump_force < 80:
+        #         hero_frame_index = 11
+        #     hero_surf = hero_frames[hero_frame_index]
+        #
+        # elif not hero_action == action.JUMPING:
+        #     jump_velocity = jump_force
+        #     jump_timer = 0.1  # initiate jump timer > 0
+        #     hero_action = action.JUMPING
+        #     jump_force = 0  # reset after key release
+        #
+        # # jump gravity
+        # jump_y = - jump_velocity * jump_timer + 0.5 * gravity * jump_timer ** 2
+        # hero_rect.bottom = screen_height - ground_rect.height + jump_y
+        #
+        # # on ground action
+        # if hero_rect.bottom >= screen_height - ground_rect.height:
+        #     hero_rect.bottom = screen_height - ground_rect.height
+        #     jump_timer = 0  # reset jump timer
+        #     hero_action = action.ON_GROUND
+        #
+        # # update jump timer
+        # if jump_timer > 0 and hero_action == action.JUMPING:
+        #     jump_timer += 0.5
+        #
+        #     # jumping animation
+        #     hero_frame_index = 12
+        #     hero_surf = hero_frames[hero_frame_index]
 
         ## HERO ATTACK #################################################################
 
@@ -489,7 +494,7 @@ while True:
 
         # hero collision with enemy_01!
         for enemy_01_rect_index in enemy_01_rect_list:
-            if hero_rect.colliderect(enemy_01_rect_index):
+            if hero.sprite.rect.colliderect(enemy_01_rect_index):
                 text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
                 screen.blit(text_collision, (650, 10))
                 # game_over = True  # GAME OVER!
@@ -507,9 +512,9 @@ while True:
 
     ## SCORE AND GRID LINES ############################################################
 
-    # count game score
-    if hero_rect.bottom < enemy_01_rect.top and hero_rect.x > enemy_01_rect.x:
-        game_score += 1
+    # # count game score
+    # if hero_rect.bottom < enemy_01_rect.top and hero_rect.x > enemy_01_rect.x:
+    #     game_score += 1
 
     # Draw the horizontal lines of the grid
     for y in range(0, screen_height, 100):
