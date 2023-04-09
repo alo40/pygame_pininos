@@ -2,6 +2,7 @@ import pygame as pg
 from sys import exit
 from random import randint
 from enum import Enum
+import gc
 
 
 class Hero(pg.sprite.Sprite):
@@ -157,11 +158,18 @@ class Enemy(pg.sprite.Sprite):
     def update(self):
 
         self.movement()
+        #self.check_position()
         # more methods cann be added here
 
     def movement(self):
 
         self.rect.x -= self.move_speed
+
+    # def check_position(self):
+    #
+    #     if self.rect.x < 50:
+    #         garbage_index = enemy_group.sprites().index(self)
+    #         return garbage_index
 
     def animation(self):
 
@@ -218,7 +226,7 @@ hero.add(Hero())
 hero_action = Action.ON_GROUND
 
 # declare hero
-enemigo = pg.sprite.Group()
+enemy_group = pg.sprite.Group()
 #enemigo.add(Enemy('enemy_01'))
 
 # # create hero surface/rectangle
@@ -334,7 +342,7 @@ while True:
         if event.type == timer_enemy_01_spawn and not game_over:
 
             # add new element to Enemy class group 'enemigo'
-            enemigo.add(Enemy('enemy_01'))
+            enemy_group.add(Enemy('enemy_01'))
 
             # # obstacle appear at random position
             # rand_position_x = randint(1200, 1800)
@@ -363,10 +371,10 @@ while True:
             # enemy_01_surf = enemy_01_frames[enemy_01_frame_index]
 
             # enemigo animation
-            if len(enemigo.sprites()) == 0:
+            if len(enemy_group.sprites()) == 0:
                 pass
             else:
-                for enemigo_index in enemigo.sprites():
+                for enemigo_index in enemy_group.sprites():
                     enemigo_index.animation()
 
     ####################################################################################
@@ -449,8 +457,17 @@ while True:
         hero.update()
 
         # draws class Enemy
-        enemigo.draw(screen)
-        enemigo.update()
+        enemy_group.draw(screen)
+        enemy_group.update()
+
+        # garbage
+        for enemy in enemy_group.sprites():
+            # garbage_index = enemy.check_position()
+            if enemy.rect.x < -100:
+                # print(f'{garbage_index}')
+                enemy_group.remove(enemy)
+                # enemy_group.sprites().pop(garbage_index)
+            # gc.garbage.append(garbage)
 
         # # Get the state of the keyboard
         # keys = pg.key.get_pressed()
@@ -604,12 +621,17 @@ while True:
     screen.blit(text_screen, (10, 90))
 
     # print game score list on screen
-    text_screen = game_active_font.render(f'ENEMY list items: {len(enemigo.sprites())}', False, 'Black')
+    text_screen = game_active_font.render(f'ENEMY list items: {len(enemy_group.sprites())}', False, 'Black')
     screen.blit(text_screen, (600, 10))
 
     # # print game score list on screen
     # text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
     # screen.blit(text_screen, (10, 90))
+
+    # # garbage collector
+    # if len(enemy_group.sprites()) > 10:
+    #     print('BASURA!')
+    #     gc.collect()
 
     # update everything
     pg.display.update()
