@@ -2,7 +2,6 @@ import pygame as pg
 from sys import exit
 from random import randint
 from enum import Enum
-import gc
 
 
 class Hero(pg.sprite.Sprite):
@@ -396,7 +395,7 @@ while True:
         screen.blit(text_game_restart, game_restart_rect)
 
         # restart enemy_01 rectangle list
-        enemy_01_rect_list = []
+        enemy_group.empty()
 
         # Get the state of the keyboard
         keys = pg.key.get_pressed()
@@ -446,6 +445,11 @@ while True:
         # # Create a text surface with the mouse position
         # text_mouse_val = game_active_font.render(f"Mouse pressed: {mouse_val}", True, 'Black')
         # screen.blit(text_mouse_val, (10, 50))
+        #
+        # # hero collision with mouse!
+        # if hero.sprite.rect.collidepoint(mouse_pos):
+        #     text_collision = game_active_font.render('Mouse collision!', False, 'Red')
+        #     screen.blit(text_collision, (600, 50))
 
         ## HERO MOVEMENT: LEFT/RIGHT ###################################################
 
@@ -462,12 +466,8 @@ while True:
 
         # garbage
         for enemy in enemy_group.sprites():
-            # garbage_index = enemy.check_position()
             if enemy.rect.x < -100:
-                # print(f'{garbage_index}')
                 enemy_group.remove(enemy)
-                # enemy_group.sprites().pop(garbage_index)
-            # gc.garbage.append(garbage)
 
         # # Get the state of the keyboard
         # keys = pg.key.get_pressed()
@@ -574,23 +574,12 @@ while True:
 
         ## COLLISION ###################################################################
 
-        # # hero collision with enemy_01!
-        # for enemy_01_rect_index in enemy_01_rect_list:
-        #     if hero.sprite.rect.colliderect(enemy_01_rect_index):
-        #         text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
-        #         screen.blit(text_collision, (650, 10))
-        #         # game_over = True  # GAME OVER!
-
-        # # hero collision with enemy_02!
-        # if hero_rect.colliderect(enemy_02_rect):
-        #     text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
-        #     screen.blit(text_collision, (650, 10))
-        #     # game_over = True  # GAME OVER!
-
-        # # hero collision with mouse!
-        # if hero_rect.collidepoint(mouse_pos):
-        #     text_collision = game_active_font.render('Mouse collision!', False, 'Red')
-        #     screen.blit(text_collision, (650, 50))
+        # hero collision with enemy_01!
+        for enemy in enemy_group:
+            if hero.sprite.rect.colliderect(enemy):
+                text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
+                screen.blit(text_collision, (600, 50))
+                game_over = True  # GAME OVER!
 
     ## SCORE AND GRID LINES ############################################################
 
@@ -627,11 +616,6 @@ while True:
     # # print game score list on screen
     # text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
     # screen.blit(text_screen, (10, 90))
-
-    # # garbage collector
-    # if len(enemy_group.sprites()) > 10:
-    #     print('BASURA!')
-    #     gc.collect()
 
     # update everything
     pg.display.update()
