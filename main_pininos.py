@@ -128,6 +128,9 @@ class Enemy(pg.sprite.Sprite):
     def __init__(self, type):
         super().__init__()
 
+        # parameters
+        self.move_speed = 10
+
         if type == 'enemy_01':
 
             # enemy_01 frames
@@ -158,7 +161,7 @@ class Enemy(pg.sprite.Sprite):
 
     def movement(self):
 
-        self.rect.x -= move_speed
+        self.rect.x -= self.move_speed
 
     def animation(self):
 
@@ -240,18 +243,18 @@ enemigo = pg.sprite.Group()
 # hero_surf = hero_frames[hero_frame_index]
 # hero_rect = hero_surf.get_rect(midbottom=(200, screen_height - ground_rect.height))
 
-# create enemy_01 surface/rectangle
-enemy_01_frame1 = pg.image.load('graphics/eye_sprite1.png').convert_alpha()
-enemy_01_frame2 = pg.image.load('graphics/eye_sprite2.png').convert_alpha()
-enemy_01_frame3 = pg.image.load('graphics/eye_sprite3.png').convert_alpha()
-enemy_01_frame4 = pg.image.load('graphics/eye_sprite2.png').convert_alpha()
-enemy_01_frames = [enemy_01_frame1, enemy_01_frame2, enemy_01_frame3, enemy_01_frame4]
-enemy_01_frame_index = 0
-enemy_01_surf = enemy_01_frames[enemy_01_frame_index]
-enemy_01_rect = enemy_01_surf.get_rect(midbottom=(600, screen_height - ground_rect.height))
-
-# create enemy_01 rectangle list
-enemy_01_rect_list = []
+# # create enemy_01 surface/rectangle
+# enemy_01_frame1 = pg.image.load('graphics/eye_sprite1.png').convert_alpha()
+# enemy_01_frame2 = pg.image.load('graphics/eye_sprite2.png').convert_alpha()
+# enemy_01_frame3 = pg.image.load('graphics/eye_sprite3.png').convert_alpha()
+# enemy_01_frame4 = pg.image.load('graphics/eye_sprite2.png').convert_alpha()
+# enemy_01_frames = [enemy_01_frame1, enemy_01_frame2, enemy_01_frame3, enemy_01_frame4]
+# enemy_01_frame_index = 0
+# enemy_01_surf = enemy_01_frames[enemy_01_frame_index]
+# enemy_01_rect = enemy_01_surf.get_rect(midbottom=(600, screen_height - ground_rect.height))
+#
+# # create enemy_01 rectangle list
+# enemy_01_rect_list = []
 
 # # create enemy_02 surface/rectangle
 # enemy_02_surf = pg.image.load('graphics/ogre_ia_simple.png').convert_alpha()
@@ -277,7 +280,7 @@ timer_enemy_01_animation = pg.USEREVENT + 3  # + 2 is used to avoid conflicts wi
 pg.time.set_timer(timer_enemy_01_animation, 200)  # tigger event in x ms
 
 # # game parameters
-move_speed = 10  # overall movement speed
+# move_speed = 10  # overall movement speed
 # gravity = 10  # overall gravity (not realistic)
 # jump_velocity = 0
 # jump_timer = 0
@@ -333,38 +336,38 @@ while True:
             # add new element to Enemy class group 'enemigo'
             enemigo.add(Enemy('enemy_01'))
 
-            # obstacle appear at random position
-            rand_position_x = randint(1200, 1800)
-            rand_position_y = screen_height - ground_rect.height - randint(0, 300)
-            enemy_01_rect_index = enemy_01_surf.get_rect(bottomright=(rand_position_x, rand_position_y))
-
-            # append obstacle only if
-            if not enemy_01_rect_list:  # empty list
-                enemy_01_rect_list.append(enemy_01_rect_index)
-            else:
-                enemy_01_rect_list.append(enemy_01_rect_index)
-
-                # remove enemy_01 if out of the screen (left side)
-                for enemy_01 in enemy_01_rect_list:
-                    if enemy_01.x < 0: enemy_01_rect_list.remove(enemy_01)
+            # # obstacle appear at random position
+            # rand_position_x = randint(1200, 1800)
+            # rand_position_y = screen_height - ground_rect.height - randint(0, 300)
+            # enemy_01_rect_index = enemy_01_surf.get_rect(bottomright=(rand_position_x, rand_position_y))
+            #
+            # # append obstacle only if
+            # if not enemy_01_rect_list:  # empty list
+            #     enemy_01_rect_list.append(enemy_01_rect_index)
+            # else:
+            #     enemy_01_rect_list.append(enemy_01_rect_index)
+            #
+            #     # remove enemy_01 if out of the screen (left side)
+            #     for enemy_01 in enemy_01_rect_list:
+            #         if enemy_01.x < 0: enemy_01_rect_list.remove(enemy_01)
 
         ## TIMER EVENT: ENEMY_01 ANIMATION #############################################
         if event.type == timer_enemy_01_animation and not game_over:
 
-            # change enemy_01_frame_index: from 0 to 1 or form 1 to 0
-            enemy_01_frame_index += 1
-            if enemy_01_frame_index > len(enemy_01_frames) - 1:
-                enemy_01_frame_index = 0
-
-            # update enemy_01 surface
-            enemy_01_surf = enemy_01_frames[enemy_01_frame_index]
+            # # change enemy_01_frame_index: from 0 to 1 or form 1 to 0
+            # enemy_01_frame_index += 1
+            # if enemy_01_frame_index > len(enemy_01_frames) - 1:
+            #     enemy_01_frame_index = 0
+            #
+            # # update enemy_01 surface
+            # enemy_01_surf = enemy_01_frames[enemy_01_frame_index]
 
             # enemigo animation
             if len(enemigo.sprites()) == 0:
                 pass
             else:
-                enemigo.sprites()[0].animation()
-
+                for enemigo_index in enemigo.sprites():
+                    enemigo_index.animation()
 
     ####################################################################################
     # game mode: GAME OVER
@@ -541,11 +544,11 @@ while True:
 
         ## ENEMIES MOVEMENT ############################################################
 
-        # draw enemy_01 and movement
-        if enemy_01_rect_list:  # check if list is not empty
-            for enemy_01_rect_index in enemy_01_rect_list:
-                screen.blit(enemy_01_surf, enemy_01_rect_index)
-                enemy_01_rect_index.x -= move_speed
+        # # draw enemy_01 and movement
+        # if enemy_01_rect_list:  # check if list is not empty
+        #     for enemy_01_rect_index in enemy_01_rect_list:
+        #         screen.blit(enemy_01_surf, enemy_01_rect_index)
+        #         enemy_01_rect_index.x -= move_speed
 
         # # draw enemy_02 and movement
         # screen.blit(enemy_02_surf, enemy_02_rect)
@@ -554,12 +557,12 @@ while True:
 
         ## COLLISION ###################################################################
 
-        # hero collision with enemy_01!
-        for enemy_01_rect_index in enemy_01_rect_list:
-            if hero.sprite.rect.colliderect(enemy_01_rect_index):
-                text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
-                screen.blit(text_collision, (650, 10))
-                # game_over = True  # GAME OVER!
+        # # hero collision with enemy_01!
+        # for enemy_01_rect_index in enemy_01_rect_list:
+        #     if hero.sprite.rect.colliderect(enemy_01_rect_index):
+        #         text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
+        #         screen.blit(text_collision, (650, 10))
+        #         # game_over = True  # GAME OVER!
 
         # # hero collision with enemy_02!
         # if hero_rect.colliderect(enemy_02_rect):
@@ -599,6 +602,10 @@ while True:
     # print game score list on screen
     text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
     screen.blit(text_screen, (10, 90))
+
+    # print game score list on screen
+    text_screen = game_active_font.render(f'ENEMY list items: {len(enemigo.sprites())}', False, 'Black')
+    screen.blit(text_screen, (600, 10))
 
     # # print game score list on screen
     # text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
