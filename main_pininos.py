@@ -156,7 +156,7 @@ class Enemy(pg.sprite.Sprite):
     def update(self):
 
         self.movement()
-        # more methods cann be added here
+        self.garbage()
 
     def movement(self):
 
@@ -171,6 +171,10 @@ class Enemy(pg.sprite.Sprite):
 
         # update enemy_01 surface
         self.image = self.frames[self.frame_index]
+
+    def garbage(self):
+        if self.rect.x < -100:
+            self.kill()
 
 
 class Action(Enum):
@@ -254,7 +258,7 @@ while True:
         ## TIMER EVENT: ENEMY_01 SPAWN #################################################
         if event.type == timer_enemy_01_spawn and not game_over:
 
-            # add new element to Enemy class group 'enemigo'
+            # add new element to enemy group
             enemy_group.add(Enemy('enemy_01'))
 
         ## TIMER EVENT: ENEMY_01 ANIMATION #############################################
@@ -264,8 +268,8 @@ while True:
             if len(enemy_group.sprites()) == 0:
                 pass
             else:
-                for enemigo_index in enemy_group.sprites():
-                    enemigo_index.animation()
+                for enemy in enemy_group.sprites():
+                    enemy.animation()
 
     ####################################################################################
     # game mode: GAME OVER
@@ -331,11 +335,6 @@ while True:
         enemy_group.draw(screen)
         enemy_group.update()
 
-        # garbage
-        for enemy in enemy_group.sprites():
-            if enemy.rect.x < -100:
-                enemy_group.remove(enemy)
-
         ## COLLISION ###################################################################
 
         # hero collision with enemy_01!
@@ -374,7 +373,7 @@ while True:
     screen.blit(text_screen, (10, 90))
 
     # print game score list on screen
-    text_screen = game_active_font.render(f'ENEMY list items: {len(enemy_group.sprites())}', False, 'Black')
+    text_screen = game_active_font.render(f'ENEMY group elements: {len(enemy_group.sprites())}', False, 'Black')
     screen.blit(text_screen, (600, 10))
 
     # # print game score list on screen
