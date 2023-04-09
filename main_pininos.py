@@ -1,6 +1,6 @@
 import pygame as pg
 from sys import exit
-from random import randint
+from random import randint, choice  # choice will be used to random spawn different types of enemies
 from enum import Enum
 
 
@@ -173,6 +173,8 @@ class Enemy(pg.sprite.Sprite):
         self.image = self.frames[self.frame_index]
 
     def garbage(self):
+
+        # destroy enemy sprite
         if self.rect.x < -100:
             self.kill()
 
@@ -229,7 +231,7 @@ pg.time.set_timer(timer_hero_standing_animation, 200)  # tigger event in x ms
 
 # timers enemy_01 spawn
 timer_enemy_01_spawn = pg.USEREVENT + 2  # + 1 is used to avoid conflicts with pygame user events
-pg.time.set_timer(timer_enemy_01_spawn, 1000)  # tigger event in x ms
+pg.time.set_timer(timer_enemy_01_spawn, 100)  # tigger event in x ms
 
 # timers enemy_01 animation
 timer_enemy_01_animation = pg.USEREVENT + 3  # + 2 is used to avoid conflicts with pygame user events
@@ -319,13 +321,9 @@ while True:
     ####################################################################################
     else:
 
-        ## BACKGROUND ##################################################################
-
         # draw background
         screen.blit(sky_surf, (0, 0))  # (x, y) position
         screen.blit(ground_surf, (0, screen_height - ground_rect.height))
-
-        ## HERO MOVEMENT: LEFT/RIGHT ###################################################
 
         # draw second hero using sprites
         hero.draw(screen)
@@ -335,14 +333,11 @@ while True:
         enemy_group.draw(screen)
         enemy_group.update()
 
-        ## COLLISION ###################################################################
-
-        # hero collision with enemy_01!
-        for enemy in enemy_group:
-            if hero.sprite.rect.colliderect(enemy):
-                text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
-                screen.blit(text_collision, (600, 50))
-                # game_over = True  # GAME OVER!
+        # hero collision with enemy_group!
+        if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
+            text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
+            screen.blit(text_collision, (600, 50))
+            game_over = True  # GAME OVER!
 
     ## SCORE AND GRID LINES ############################################################
 
