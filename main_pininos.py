@@ -1,6 +1,6 @@
 import pygame as pg
 from sys import exit
-from random import randint
+from random import randint, choice  # choice will be used to random spawn different types of enemies
 from enum import Enum
 
 
@@ -50,6 +50,10 @@ class Hero(pg.sprite.Sprite):
         self.image = self.frames[self.frame_index]
         self.rect = self.image.get_rect(midbottom=(200, screen_height - ground_rect.height))
 
+        # add jump sound
+        self.jump_sound = pg.mixer.Sound('audio/jump.mp3')
+        self.jump_sound.set_volume(0.02)
+
     def update(self):
 
         # self.standing()  # used in the event: timer_hero_standing_animation
@@ -97,8 +101,14 @@ class Hero(pg.sprite.Sprite):
             self.image = self.frames[self.frame_index]
 
         elif not self.action == Action.JUMPING:
+
+            # play jump sound (only once)
+            if pg.mixer.get_busy() == 0 and self.jump_force > 0:
+                self.jump_sound.play()
+
+            # initiate jump timer > 0
             self.jump_velocity = self.jump_force
-            self.jump_timer = 0.1  # initiate jump timer > 0
+            self.jump_timer = 0.1
             self.action = Action.JUMPING
             self.jump_force = 0  # reset after key release
 
@@ -173,6 +183,8 @@ class Enemy(pg.sprite.Sprite):
         self.image = self.frames[self.frame_index]
 
     def garbage(self):
+
+        # destroy enemy sprite
         if self.rect.x < -100:
             self.kill()
 
@@ -250,7 +262,7 @@ while True:
         if event.type == timer_hero_standing_animation \
                 and not game_over \
                 and hero.sprite.action == Action.ON_GROUND \
-                and hero.sprite.jump_force == 0:  # to avoid conflict with crounch animtation
+                and hero.sprite.jump_force == 0:  # to avoid conflict with crouch animation
 
             # update hero image
             hero.sprite.standing()
@@ -319,13 +331,9 @@ while True:
     ####################################################################################
     else:
 
-        ## BACKGROUND ##################################################################
-
         # draw background
         screen.blit(sky_surf, (0, 0))  # (x, y) position
         screen.blit(ground_surf, (0, screen_height - ground_rect.height))
-
-        ## HERO MOVEMENT: LEFT/RIGHT ###################################################
 
         # draw second hero using sprites
         hero.draw(screen)
@@ -335,14 +343,11 @@ while True:
         enemy_group.draw(screen)
         enemy_group.update()
 
-        ## COLLISION ###################################################################
-
-        # hero collision with enemy_01!
-        for enemy in enemy_group:
-            if hero.sprite.rect.colliderect(enemy):
-                text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
-                screen.blit(text_collision, (600, 50))
-                # game_over = True  # GAME OVER!
+        # hero collision with enemy_group!
+        if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
+            text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
+            screen.blit(text_collision, (600, 50))
+            # game_over = True  # GAME OVER!
 
     ## SCORE AND GRID LINES ############################################################
 
