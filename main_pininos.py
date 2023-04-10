@@ -18,6 +18,8 @@ class Hero(pg.sprite.Sprite):
         self.jump_pixel = 0
         self.gravity = 10
         self.action = Action.ON_GROUND
+        self.upper_pixel_x = 0
+        self.upper_pixel_y = 0
 
         # standing frames
         stand_01 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()
@@ -50,6 +52,9 @@ class Hero(pg.sprite.Sprite):
         self.image = self.frames[self.frame_index]
         self.rect = self.image.get_rect(midbottom=(200, screen_height - ground_rect.height))
 
+        # save original rect height
+        self.rect_original_height = self.rect.height  # used in rect resize method
+
         # add jump sound
         self.jump_sound = pg.mixer.Sound('audio/jump.mp3')
         self.jump_sound.set_volume(0.02)
@@ -62,7 +67,8 @@ class Hero(pg.sprite.Sprite):
 
         # update image.rect based on the pixel art (in testing)
         self.draw_boundaries()
-        self.locate_most_upper_pixel()
+        self.locate_upper_pixel()
+        self.resize_rect()
 
     def standing(self):
 
@@ -144,7 +150,7 @@ class Hero(pg.sprite.Sprite):
         rect_height = self.rect.height
         pg.draw.rect(screen, 'Red', pg.Rect(rect_x, rect_y, rect_width, rect_height), 4)
 
-    def locate_most_upper_pixel(self):
+    def locate_upper_pixel(self):
 
         # create a mask from the image surface
         mask = pg.mask.from_surface(self.image)
@@ -153,11 +159,15 @@ class Hero(pg.sprite.Sprite):
         mask_rect = mask.get_bounding_rects()[0]
 
         # calculate the position of the most upper pixel
-        most_upper_pixel_x = mask_rect.centerx
-        most_upper_pixel_y = mask_rect.top
+        self.upper_pixel_x = mask_rect.centerx
+        self.upper_pixel_y = mask_rect.top
 
-        return most_upper_pixel_x, most_upper_pixel_y
-        # print("Most upper pixel position:", (most_upper_pixel_x, most_upper_pixel_y))
+        return self.upper_pixel_x, self.upper_pixel_y
+
+    def resize_rect(self):
+
+        # resize hero rectangle
+        self.rect.height = self.rect_original_height - self.upper_pixel_y
 
 
 class Enemy(pg.sprite.Sprite):
@@ -420,8 +430,8 @@ while True:
     #     hero.sprite.rect.height -= 10
 
     # print most upper pixel position
-    most_upper_pixel_x, most_upper_pixel_y = hero.sprite.locate_most_upper_pixel()
-    text_screen = game_active_font.render(f'x:{most_upper_pixel_x}, y:{most_upper_pixel_y}', False, 'Black')
+    upper_pixel_x, upper_pixel_y = hero.sprite.locate_upper_pixel()
+    text_screen = game_active_font.render(f'upper pixel: x:{upper_pixel_x}, y:{upper_pixel_y}', False, 'Black')
     screen.blit(text_screen, (1200, 10))
 
     # update everything
