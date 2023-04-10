@@ -60,6 +60,10 @@ class Hero(pg.sprite.Sprite):
         self.walking()
         self.jumping()
 
+        # update image.rect based on the pixel art (in testing)
+        self.draw_boundaries()
+        self.locate_most_upper_pixel()
+
     def standing(self):
 
         # animation
@@ -102,9 +106,9 @@ class Hero(pg.sprite.Sprite):
 
         elif not self.action == Action.JUMPING:
 
-            # play jump sound (only once)
-            if pg.mixer.get_busy() == 0 and self.jump_force > 0:
-                self.jump_sound.play()
+            # # play jump sound (only once)
+            # if pg.mixer.get_busy() == 0 and self.jump_force > 0:
+            #     self.jump_sound.play()
 
             # initiate jump timer > 0
             self.jump_velocity = self.jump_force
@@ -130,6 +134,30 @@ class Hero(pg.sprite.Sprite):
             self.rect.bottom = screen_height - ground_rect.height
             self.jump_timer = 0  # reset jump timer
             self.action = Action.ON_GROUND
+
+    def draw_boundaries(self):
+
+        # draw the red rectangle within the boundary (only for testing)
+        rect_x = self.rect.x
+        rect_y = self.rect.y
+        rect_width = self.rect.width
+        rect_height = self.rect.height
+        pg.draw.rect(screen, 'Red', pg.Rect(rect_x, rect_y, rect_width, rect_height), 4)
+
+    def locate_most_upper_pixel(self):
+
+        # create a mask from the image surface
+        mask = pg.mask.from_surface(self.image)
+
+        # get the bounding rectangle of the mask
+        mask_rect = mask.get_bounding_rects()[0]
+
+        # calculate the position of the most upper pixel
+        most_upper_pixel_x = mask_rect.centerx
+        most_upper_pixel_y = mask_rect.top
+
+        return most_upper_pixel_x, most_upper_pixel_y
+        # print("Most upper pixel position:", (most_upper_pixel_x, most_upper_pixel_y))
 
 
 class Enemy(pg.sprite.Sprite):
@@ -356,11 +384,11 @@ while True:
     #     game_score += 1
 
     # Draw the horizontal lines of the grid
-    for y in range(0, screen_height, 100):
+    for y in range(0, screen_height, 50):
         pg.draw.line(screen, 'Black', (0, y), (screen_width, y))
 
     # Draw the vertical lines of the grid
-    for x in range(0, screen_width, 100):
+    for x in range(0, screen_width, 50):
         pg.draw.line(screen, 'Black', (x, 0), (x, screen_height))
 
     ## LOOP END ########################################################################
@@ -384,6 +412,17 @@ while True:
     # # print game score list on screen
     # text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
     # screen.blit(text_screen, (10, 90))
+
+    # # reduce rect size (testing phase)
+    # keys = pg.key.get_pressed()
+    # if keys[pg.K_SPACE]:
+    #     # print('key pressed')
+    #     hero.sprite.rect.height -= 10
+
+    # print most upper pixel position
+    most_upper_pixel_x, most_upper_pixel_y = hero.sprite.locate_most_upper_pixel()
+    text_screen = game_active_font.render(f'x:{most_upper_pixel_x}, y:{most_upper_pixel_y}', False, 'Black')
+    screen.blit(text_screen, (1200, 10))
 
     # update everything
     pg.display.update()
