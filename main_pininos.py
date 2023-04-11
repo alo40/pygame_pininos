@@ -52,8 +52,9 @@ class Hero(pg.sprite.Sprite):
         self.image = self.frames[self.frame_index]
         self.rect = self.image.get_rect(midbottom=(200, screen_height - ground_rect.height))
 
-        # save original rect height
-        self.rect_original_height = self.rect.height  # used in rect resize method
+        # save original rect height and bottom (used in rect resize method)
+        self.rect_original_height = self.rect.height
+        self.rect_original_bottom = self.rect.bottom
 
         # add jump sound
         self.jump_sound = pg.mixer.Sound('audio/jump.mp3')
@@ -168,6 +169,10 @@ class Hero(pg.sprite.Sprite):
 
         # resize hero rectangle
         self.rect.height = self.rect_original_height - self.upper_pixel_y
+
+        # readjust the image bottom
+        if not self.action == Action.JUMPING:
+            self.rect.bottom = self.rect_original_bottom - self.upper_pixel_y
 
 
 class Enemy(pg.sprite.Sprite):
