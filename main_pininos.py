@@ -67,9 +67,9 @@ class Hero(pg.sprite.Sprite):
         self.jumping()
 
         # update image.rect based on the pixel art (in testing)
-        self.draw_boundaries()
         self.locate_upper_pixel()
         self.resize_rect()
+        self.draw_boundaries()
 
     def standing(self):
 
@@ -167,12 +167,32 @@ class Hero(pg.sprite.Sprite):
 
     def resize_rect(self):
 
-        # resize hero rectangle
-        self.rect.height = self.rect_original_height - self.upper_pixel_y
+        # # resize hero rectangle
+        # self.rect.height = self.rect_original_height - self.upper_pixel_y
 
         # readjust the image bottom
-        if not self.action == Action.JUMPING:
-            self.rect.bottom = self.rect_original_bottom - self.upper_pixel_y
+        # if not self.action == Action.JUMPING:
+           # self.rect.bottom = self.rect_original_bottom - self.upper_pixel_y
+           # self.rect.top = 400 + self.upper_pixel_y
+
+        # crop image
+        cropped_rect = pg.Rect(0,  # left
+                               0 + self.upper_pixel_y,  # top
+                               100,  # width
+                               200 - self.upper_pixel_y)  # height
+        cropped_image = self.image.subsurface(cropped_rect)
+        cropped_rect = cropped_image.get_rect()
+
+        # move coordinates
+        cropped_rect.x = self.rect.x + 100
+        cropped_rect.y = self.rect.y + self.upper_pixel_y
+        screen.blit(cropped_image, cropped_rect)
+
+        # draw cropped image boundaries
+        pg.draw.rect(screen, 'Red', pg.Rect(cropped_rect.x,
+                                            cropped_rect.y,
+                                            cropped_rect.width,
+                                            cropped_rect.height), 4)
 
 
 class Enemy(pg.sprite.Sprite):
@@ -181,7 +201,7 @@ class Enemy(pg.sprite.Sprite):
         super().__init__()
 
         # parameters
-        self.move_speed = 10
+        self.move_speed = 5
 
         if type == 'enemy_01':
 
@@ -408,21 +428,21 @@ while True:
 
     ## LOOP END ########################################################################
 
-    # print hero action on screen
-    text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
-    screen.blit(text_screen, (10, 10))
-
-    # print jump force list on screen
-    text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
-    screen.blit(text_screen, (10, 50))
-
-    # print game score list on screen
-    text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
-    screen.blit(text_screen, (10, 90))
-
-    # print game score list on screen
-    text_screen = game_active_font.render(f'ENEMY group elements: {len(enemy_group.sprites())}', False, 'Black')
-    screen.blit(text_screen, (600, 10))
+    # # print hero action on screen
+    # text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
+    # screen.blit(text_screen, (10, 10))
+    #
+    # # print jump force list on screen
+    # text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
+    # screen.blit(text_screen, (10, 50))
+    #
+    # # print game score list on screen
+    # text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
+    # screen.blit(text_screen, (10, 90))
+    #
+    # # print game score list on screen
+    # text_screen = game_active_font.render(f'ENEMY group elements: {len(enemy_group.sprites())}', False, 'Black')
+    # screen.blit(text_screen, (600, 10))
 
     # # print game score list on screen
     # text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
