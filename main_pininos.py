@@ -108,8 +108,7 @@ class Hero(pg.sprite.Sprite):
             self.image = self.frames[self.frame_index]
 
             # crouching animation (dynamic)
-            upper_pixel_y = self.locate_upper_pixel()
-            self.image, self.rect = self.resize_rect(upper_pixel_y)
+            self.image, self.rect = self.resize_rect()
 
         elif not self.action == Action.JUMPING:
 
@@ -127,7 +126,7 @@ class Hero(pg.sprite.Sprite):
             # jumping animation
             self.frame_index = 12
             self.image = self.frames[self.frame_index]
-            self.rect.height = 200
+            self.rect.height = 200  # reset rect height
 
         # update jump timer
         if self.jump_timer > 0 and self.action == Action.JUMPING:
@@ -152,7 +151,7 @@ class Hero(pg.sprite.Sprite):
         rect_height = self.rect.height
         pg.draw.rect(screen, 'Red', pg.Rect(rect_x, rect_y, rect_width, rect_height), 4)
 
-    def locate_upper_pixel(self):
+    def resize_rect(self):
 
         # create a mask from the image surface
         mask = pg.mask.from_surface(self.image)
@@ -162,16 +161,6 @@ class Hero(pg.sprite.Sprite):
 
         # calculate the position of the most upper pixel
         upper_pixel_y = mask_rect.top
-
-        # print most upper pixel position
-        text_screen = game_active_font.render(f'upper pixel y: {upper_pixel_y}', False, 'Black')
-        screen.blit(text_screen, (1200, 10))
-
-        return upper_pixel_y
-
-    def resize_rect(self, upper_pixel_y):
-
-        ### MODIFIED ##################################################################################
 
         # crop image
         rect_crop = pg.Rect(0,  # left
@@ -185,53 +174,7 @@ class Hero(pg.sprite.Sprite):
         rect_crop.x = self.rect.x + 0
         rect_crop.y = self.rect.y + upper_pixel_y
 
-        # # draw cropped rect (testing only)
-        # screen.blit(image_crop, rect_crop)
-        #
-        # # draw cropped image boundaries (testing only)
-        # pg.draw.rect(screen, 'Blue', pg.Rect(rect_crop.x, rect_crop.y, rect_crop.width, rect_crop.height), 4)
-
         return image_crop, rect_crop
-
-        ### ORIGINAL ##################################################################################
-
-        # # crop image
-        # self.rect_cropped = pg.Rect(0,  # left
-        #                        0 + self.upper_pixel_y,  # top
-        #                        100,  # width
-        #                        200 - self.upper_pixel_y)  # height
-        # self.image_cropped = self.image.subsurface(self.rect_cropped)
-        # self.rect_cropped = self.image_cropped.get_rect()
-        #
-        # # move rect coordinates
-        # self.rect_cropped.x = self.rect.x + 100
-        # self.rect_cropped.y = self.rect.y + self.upper_pixel_y
-        #
-        # # draw cropped rect (testing only)
-        # screen.blit(self.image_cropped, self.rect_cropped)
-        #
-        # # draw cropped image boundaries (testing only)
-        # pg.draw.rect(screen, 'Red', pg.Rect(self.rect_cropped.x,
-        #                                     self.rect_cropped.y,
-        #                                     self.rect_cropped.width,
-        #                                     self.rect_cropped.height), 4)
-
-        ### NOT USED ##################################################################################
-        # # resize hero rectangle
-        # self.rect.height = self.rect_original_height - self.upper_pixel_y
-
-        # readjust the image bottom
-        # if not self.action == Action.JUMPING:
-           # self.rect.bottom = self.rect_original_bottom - self.upper_pixel_y
-           # self.rect.top = 400 + self.upper_pixel_y
-
-        # update original image
-        # self.image = self.frames[self.frame_index]
-        # self.rect = self.image.get_rect(midbottom=(200, screen_height - ground_rect.height))
-
-        # self.rect = cropped_image.get_rect(midbottom=(200, screen_height - ground_rect.height))
-        # self.rect = cropped_rect.copy()
-
 
 class Enemy(pg.sprite.Sprite):
 
@@ -485,12 +428,6 @@ while True:
     # # print game score on screen
     # text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
     # screen.blit(text_screen, (10, 90))
-
-    # # reduce rect size (testing phase)
-    # keys = pg.key.get_pressed()
-    # if keys[pg.K_SPACE]:
-    #     # print('key pressed')
-    #     hero.sprite.rect.height -= 10
 
     # update everything
     pg.display.update()
