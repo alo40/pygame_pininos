@@ -270,6 +270,10 @@ ground_rect = ground_surf.get_rect(bottomleft=(0, screen_height))
 sky_surf = pg.Surface((screen_width, screen_height - ground_rect.height))
 sky_surf.fill('#EFBBEB')  # light purple
 
+# create horizon surface
+horizon_surf = pg.image.load('graphics/horizont_day_1.png').convert()
+horizon_rect = horizon_surf.get_rect(topleft=(0, 0))
+
 # declare hero group and hero
 hero = pg.sprite.GroupSingle()
 hero.add(Hero())
@@ -377,8 +381,9 @@ while True:
     else:
 
         # draw background
-        screen.blit(sky_surf, (0, 0))  # (x, y) position
-        screen.blit(ground_surf, (0, screen_height - ground_rect.height))
+        screen.blit(horizon_surf, (0, 0))
+        # screen.blit(sky_surf, (0, 0))  # (x, y) position
+        # screen.blit(ground_surf, (0, screen_height - ground_rect.height))
 
         # draw second hero using sprites
         hero.draw(screen)
