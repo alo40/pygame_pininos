@@ -3,7 +3,6 @@ from sys import exit
 from random import randint, choice  # choice will be used to random spawn different types of enemies
 from enum import Enum
 
-
 class Hero(pg.sprite.Sprite):
 
     def __init__(self):
@@ -176,13 +175,14 @@ class Hero(pg.sprite.Sprite):
 
         return image_crop, rect_crop
 
+
 class Enemy(pg.sprite.Sprite):
 
     def __init__(self, type):
         super().__init__()
 
         # parameters
-        self.move_speed = 5
+        self.move_speed = 10
 
         if type == 'enemy_01':
 
@@ -239,8 +239,9 @@ class Action(Enum):
     JUMPING = 2
     # FALLING = 3  # not used
 
-
-# game init
+####################################################################################
+# game mode: GAME INIT
+####################################################################################
 pg.init()
 
 # set to True for game over / False for game active
