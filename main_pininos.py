@@ -18,8 +18,6 @@ class Hero(pg.sprite.Sprite):
         self.jump_pixel = 0
         self.gravity = 10
         self.action = Action.ON_GROUND
-        self.upper_pixel_x = 0
-        self.upper_pixel_y = 0
 
         # standing frames
         stand_01 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()
@@ -66,9 +64,7 @@ class Hero(pg.sprite.Sprite):
         self.walking()
         self.jumping()
 
-        # update image.rect based on the pixel art (in testing)
-        self.locate_upper_pixel()
-        self.resize_rect()
+        # only for testing
         self.draw_boundaries()
 
     def standing(self):
@@ -107,9 +103,13 @@ class Hero(pg.sprite.Sprite):
             if self.jump_force > self.jump_force_max:
                 self.jump_force = self.jump_force_max
 
-            # crouching animation
+            # crouching animation (static)
             self.frame_index = int(self.jump_force/self.jump_force_max * 8) + 3
             self.image = self.frames[self.frame_index]
+
+            # crouching animation (dynamic)
+            upper_pixel_y = self.locate_upper_pixel()
+            self.image, self.rect = self.resize_rect(upper_pixel_y)
 
         elif not self.action == Action.JUMPING:
 
@@ -127,6 +127,7 @@ class Hero(pg.sprite.Sprite):
             # jumping animation
             self.frame_index = 12
             self.image = self.frames[self.frame_index]
+            self.rect.height = 200
 
         # update jump timer
         if self.jump_timer > 0 and self.action == Action.JUMPING:
@@ -160,13 +161,62 @@ class Hero(pg.sprite.Sprite):
         mask_rect = mask.get_bounding_rects()[0]
 
         # calculate the position of the most upper pixel
-        self.upper_pixel_x = mask_rect.centerx
-        self.upper_pixel_y = mask_rect.top
+        upper_pixel_y = mask_rect.top
 
-        return self.upper_pixel_x, self.upper_pixel_y
+        # print most upper pixel position
+        text_screen = game_active_font.render(f'upper pixel y: {upper_pixel_y}', False, 'Black')
+        screen.blit(text_screen, (1200, 10))
 
-    def resize_rect(self):
+        return upper_pixel_y
 
+    def resize_rect(self, upper_pixel_y):
+
+        ### MODIFIED ##################################################################################
+
+        # crop image
+        rect_crop = pg.Rect(0,  # left
+                            0 + upper_pixel_y,  # top
+                            100,  # width
+                            200 - upper_pixel_y)  # height
+        image_crop = self.image.subsurface(rect_crop)
+        rect_crop = image_crop.get_rect()
+
+        # move rect coordinates
+        rect_crop.x = self.rect.x + 0
+        rect_crop.y = self.rect.y + upper_pixel_y
+
+        # # draw cropped rect (testing only)
+        # screen.blit(image_crop, rect_crop)
+        #
+        # # draw cropped image boundaries (testing only)
+        # pg.draw.rect(screen, 'Blue', pg.Rect(rect_crop.x, rect_crop.y, rect_crop.width, rect_crop.height), 4)
+
+        return image_crop, rect_crop
+
+        ### ORIGINAL ##################################################################################
+
+        # # crop image
+        # self.rect_cropped = pg.Rect(0,  # left
+        #                        0 + self.upper_pixel_y,  # top
+        #                        100,  # width
+        #                        200 - self.upper_pixel_y)  # height
+        # self.image_cropped = self.image.subsurface(self.rect_cropped)
+        # self.rect_cropped = self.image_cropped.get_rect()
+        #
+        # # move rect coordinates
+        # self.rect_cropped.x = self.rect.x + 100
+        # self.rect_cropped.y = self.rect.y + self.upper_pixel_y
+        #
+        # # draw cropped rect (testing only)
+        # screen.blit(self.image_cropped, self.rect_cropped)
+        #
+        # # draw cropped image boundaries (testing only)
+        # pg.draw.rect(screen, 'Red', pg.Rect(self.rect_cropped.x,
+        #                                     self.rect_cropped.y,
+        #                                     self.rect_cropped.width,
+        #                                     self.rect_cropped.height), 4)
+
+        ### NOT USED ##################################################################################
         # # resize hero rectangle
         # self.rect.height = self.rect_original_height - self.upper_pixel_y
 
@@ -175,24 +225,12 @@ class Hero(pg.sprite.Sprite):
            # self.rect.bottom = self.rect_original_bottom - self.upper_pixel_y
            # self.rect.top = 400 + self.upper_pixel_y
 
-        # crop image
-        cropped_rect = pg.Rect(0,  # left
-                               0 + self.upper_pixel_y,  # top
-                               100,  # width
-                               200 - self.upper_pixel_y)  # height
-        cropped_image = self.image.subsurface(cropped_rect)
-        cropped_rect = cropped_image.get_rect()
+        # update original image
+        # self.image = self.frames[self.frame_index]
+        # self.rect = self.image.get_rect(midbottom=(200, screen_height - ground_rect.height))
 
-        # move coordinates
-        cropped_rect.x = self.rect.x + 100
-        cropped_rect.y = self.rect.y + self.upper_pixel_y
-        screen.blit(cropped_image, cropped_rect)
-
-        # draw cropped image boundaries
-        pg.draw.rect(screen, 'Red', pg.Rect(cropped_rect.x,
-                                            cropped_rect.y,
-                                            cropped_rect.width,
-                                            cropped_rect.height), 4)
+        # self.rect = cropped_image.get_rect(midbottom=(200, screen_height - ground_rect.height))
+        # self.rect = cropped_rect.copy()
 
 
 class Enemy(pg.sprite.Sprite):
@@ -428,23 +466,23 @@ while True:
 
     ## LOOP END ########################################################################
 
-    # # print hero action on screen
-    # text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
-    # screen.blit(text_screen, (10, 10))
-    #
-    # # print jump force list on screen
-    # text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
-    # screen.blit(text_screen, (10, 50))
-    #
-    # # print game score list on screen
-    # text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
-    # screen.blit(text_screen, (10, 90))
-    #
-    # # print game score list on screen
+    # print hero action on screen
+    text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
+    screen.blit(text_screen, (10, 10))
+
+    # print jump force list on screen
+    text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
+    screen.blit(text_screen, (10, 50))
+
+    # print game score list on screen
+    text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
+    screen.blit(text_screen, (10, 90))
+
+    # # print enemy list on screen
     # text_screen = game_active_font.render(f'ENEMY group elements: {len(enemy_group.sprites())}', False, 'Black')
     # screen.blit(text_screen, (600, 10))
 
-    # # print game score list on screen
+    # # print game score on screen
     # text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
     # screen.blit(text_screen, (10, 90))
 
@@ -453,11 +491,6 @@ while True:
     # if keys[pg.K_SPACE]:
     #     # print('key pressed')
     #     hero.sprite.rect.height -= 10
-
-    # print most upper pixel position
-    upper_pixel_x, upper_pixel_y = hero.sprite.locate_upper_pixel()
-    text_screen = game_active_font.render(f'upper pixel: x:{upper_pixel_x}, y:{upper_pixel_y}', False, 'Black')
-    screen.blit(text_screen, (1200, 10))
 
     # update everything
     pg.display.update()
