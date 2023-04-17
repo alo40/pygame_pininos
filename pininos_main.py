@@ -397,7 +397,7 @@ while True:
         if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
             text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
             screen.blit(text_collision, (600, 50))
-            # game_over = True  # GAME OVER!
+            game_over = True  # GAME OVER!
 
     ## SCORE AND GRID LINES ############################################################
 
