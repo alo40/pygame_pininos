@@ -262,19 +262,23 @@ class Enemy(pg.sprite.Sprite):
 
 
 class Action(Enum):
-
     ON_GROUND = 1
     JUMPING = 2
     # FALLING = 3  # not used
 
 
-####################################################################################
+class Game(Enum):
+    OVER = 1
+    ACTIVE = 2
+    WON = 3
+
+########################################################################################
 # game mode: GAME INIT
-####################################################################################
+#########################################################################################
 pg.init()
 
 # set to True for game over / False for game active
-game_over = False
+game_mode = Game.ACTIVE
 
 # initialize game score
 game_score = 0
@@ -331,6 +335,10 @@ pg.time.set_timer(timer_enemy_01_animation, 200)  # tigger event in x ms
 # game loop
 while True:
 
+    #####################################################################################
+    # game mode: EVENTS
+    #####################################################################################
+
     # loop through events
     for event in pg.event.get():
 
@@ -341,7 +349,7 @@ while True:
 
         # TIMER EVENT: HERO STANDING ANIMATION
         if event.type == timer_hero_standing_animation \
-                and not game_over \
+                and game_mode == Game.ACTIVE \
                 and hero.sprite.action == Action.ON_GROUND \
                 and hero.sprite.jump_force == 0:  # to avoid conflict with crouch animation
 
@@ -349,13 +357,13 @@ while True:
             hero.sprite.standing()
 
         # TIMER EVENT: ENEMY_01 SPAWN
-        if event.type == timer_enemy_01_spawn and not game_over:
+        if event.type == timer_enemy_01_spawn and game_mode == Game.ACTIVE:
 
             # add new element to enemy group
             enemy_group.add(Enemy('enemy_01'))
 
         # TIMER EVENT: ENEMY_01 ANIMATION
-        if event.type == timer_enemy_01_animation and not game_over:
+        if event.type == timer_enemy_01_animation and game_mode == Game.ACTIVE:
 
             # enemy animation
             if len(enemy_group.sprites()) == 0:
@@ -364,16 +372,16 @@ while True:
                 for enemy in enemy_group.sprites():
                     enemy.animation()
 
-    ####################################################################################
-    # game mode: GAME OVER
-    ####################################################################################
-    if game_over:
+    #####################################################################################
+    # game mode: GAME OVER/GAME WON
+    #####################################################################################
+    if game_mode == Game.OVER or game_mode == Game.WON:
 
         # black screen
         screen.fill('Black')
 
         # game over text (big font)
-        text_game_over = game_over_font.render(f"GAME OVER", True, 'Red')
+        text_game_over = game_over_font.render(f"GAME {game_mode.name}", True, 'Red')
         game_over_rect = text_game_over.get_rect(center=(screen_width / 2, screen_height / 2))
         screen.blit(text_game_over, game_over_rect)
 
@@ -405,12 +413,12 @@ while True:
             game_score = 0
 
             # restart game
-            game_over = False
+            game_mode = Game.ACTIVE
 
-    ####################################################################################
+    #####################################################################################
     # game mode: GAME ACTIVE
-    ####################################################################################
-    else:
+    #####################################################################################
+    elif game_mode == Game.ACTIVE:
 
         # draw background
         screen.blit(horizon_surf, (0, 0))
@@ -429,48 +437,51 @@ while True:
         if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
             text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
             screen.blit(text_collision, (600, 50))
-            # game_over = True  # GAME OVER!
+            game_mode = Game.OVER  # GAME OVER!
 
-    # SCORE AND GRID LINES ############################################################
+        # SCORE AND GRID LINES ##########################################################
 
-    # count game score
-    # if len(enemy_group) > 0:
-    for enemy in enemy_group.sprites():
-        if hero.sprite.rect.bottom < enemy.rect.top \
-                and hero.sprite.rect.x > enemy.rect.x\
-                and not enemy.hero_dodge:
-            game_score += 1
-            enemy.hero_dodge = True  # to avoid more than one score increment
+        # count game score
+        # if len(enemy_group) > 0:
+        for enemy in enemy_group.sprites():
+            if hero.sprite.rect.bottom < enemy.rect.top \
+                    and hero.sprite.rect.x > enemy.rect.x\
+                    and not enemy.hero_dodge:
+                game_score += 1
+                enemy.hero_dodge = True  # to avoid more than one score increment
 
-    # Draw the horizontal lines of the grid
-    for y in range(0, screen_height, 50):
-        pg.draw.line(screen, 'Black', (0, y), (screen_width, y))
+        if game_score >= 20:
+            game_mode = Game.WON
 
-    # Draw the vertical lines of the grid
-    for x in range(0, screen_width, 50):
-        pg.draw.line(screen, 'Black', (x, 0), (x, screen_height))
+        # Draw the horizontal lines of the grid
+        for y in range(0, screen_height, 50):
+            pg.draw.line(screen, 'Black', (0, y), (screen_width, y))
 
-    # LOOP END ########################################################################
+        # Draw the vertical lines of the grid
+        for x in range(0, screen_width, 50):
+            pg.draw.line(screen, 'Black', (x, 0), (x, screen_height))
 
-    # print hero action on screen
-    text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
-    screen.blit(text_screen, (10, 10))
+        # TEXT MESSAGES #################################################################
 
-    # print jump force list on screen
-    text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
-    screen.blit(text_screen, (10, 50))
+        # print hero action on screen
+        text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
+        screen.blit(text_screen, (10, 10))
 
-    # print game score list on screen
-    text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
-    screen.blit(text_screen, (10, 90))
+        # print jump force list on screen
+        text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
+        screen.blit(text_screen, (10, 50))
 
-    # print enemy list on screen
-    text_screen = game_active_font.render(f'ENEMY group: {len(enemy_group.sprites())}', False, 'Black')
-    screen.blit(text_screen, (600, 10))
+        # print game score list on screen
+        text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
+        screen.blit(text_screen, (10, 90))
 
-    # print game score on screen
-    text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
-    screen.blit(text_screen, (1200, 10))
+        # print enemy list on screen
+        text_screen = game_active_font.render(f'ENEMY group: {len(enemy_group.sprites())}', False, 'Black')
+        screen.blit(text_screen, (600, 10))
+
+        # print game score on screen
+        text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
+        screen.blit(text_screen, (1200, 10))
 
     # update everything
     pg.display.update()
