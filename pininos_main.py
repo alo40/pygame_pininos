@@ -445,7 +445,7 @@ while True:
         # if len(enemy_group) > 0:
         for enemy in enemy_group.sprites():
             if hero.sprite.rect.bottom < enemy.rect.top \
-                    and hero.sprite.rect.x > enemy.rect.x\
+                    and enemy.rect.x < hero.sprite.rect.x < enemy.rect.x + 50 \
                     and not enemy.hero_dodge:
                 game_score += 1
                 enemy.hero_dodge = True  # to avoid more than one score increment
