@@ -483,6 +483,10 @@ while True:
         text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
         screen.blit(text_screen, (1200, 10))
 
+    # Show frame rate in title bar
+    fps = game_clock.get_fps()
+    pg.display.set_caption(f"My Game - FPS: {fps:.2f}")
+
     # update everything
     pg.display.update()
     game_clock.tick(60)  # ceiling limit of 60 fps
