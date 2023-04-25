@@ -29,6 +29,7 @@ from enum import Enum
 # import debugpy
 # debugpy.listen(("localhost", 5678))
 
+
 class Hero(pg.sprite.Sprite):
 
     def __init__(self):
@@ -90,7 +91,7 @@ class Hero(pg.sprite.Sprite):
         self.jumping()
 
         # only for testing
-        self.draw_boundaries()
+        # self.draw_boundaries()
 
     def standing(self):
 
@@ -302,12 +303,12 @@ game_clock = pg.time.Clock()
 ground_surf = pg.image.load('graphics/ground_1600x200.png').convert()
 ground_rect = ground_surf.get_rect(bottomleft=(0, screen_height))
 
-# create sky surface
-sky_surf = pg.Surface((screen_width, screen_height - ground_rect.height))
-sky_surf.fill('#EFBBEB')  # light purple
+# # create sky surface
+# sky_surf = pg.Surface((screen_width, screen_height - ground_rect.height))
+# sky_surf.fill('#EFBBEB')  # light purple
 
 # create horizon surface
-horizon_surf = pg.image.load('graphics/horizont_day_1.png').convert()
+horizon_surf = pg.image.load('graphics/horizont_day_3.png').convert()
 horizon_rect = horizon_surf.get_rect(topleft=(0, 0))
 
 # declare hero group and hero
@@ -439,7 +440,7 @@ while True:
             screen.blit(text_collision, (600, 50))
             game_mode = Game.OVER  # GAME OVER!
 
-        # SCORE AND GRID LINES ##########################################################
+        # GAME SCORE ####################################################################
 
         # count game score
         # if len(enemy_group) > 0:
@@ -453,39 +454,43 @@ while True:
         if game_score >= 20:
             game_mode = Game.WON
 
-        # Draw the horizontal lines of the grid
-        for y in range(0, screen_height, 50):
-            pg.draw.line(screen, 'Black', (0, y), (screen_width, y))
+        # GRID LINES  ###################################################################
 
-        # Draw the vertical lines of the grid
-        for x in range(0, screen_width, 50):
-            pg.draw.line(screen, 'Black', (x, 0), (x, screen_height))
+        # # Draw the horizontal lines of the grid
+        # for y in range(0, screen_height, 50):
+        #     pg.draw.line(screen, 'Black', (0, y), (screen_width, y))
+        #
+        # # Draw the vertical lines of the grid
+        # for x in range(0, screen_width, 50):
+        #     pg.draw.line(screen, 'Black', (x, 0), (x, screen_height))
 
         # TEXT MESSAGES #################################################################
 
-        # print hero action on screen
-        text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
-        screen.blit(text_screen, (10, 10))
+        # # print hero action on screen
+        # text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
+        # screen.blit(text_screen, (10, 10))
+        #
+        # # print jump force list on screen
+        # text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
+        # screen.blit(text_screen, (10, 50))
+        #
+        # # print game score list on screen
+        # text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
+        # screen.blit(text_screen, (10, 90))
+        #
+        # # print enemy list on screen
+        # text_screen = game_active_font.render(f'ENEMY group: {len(enemy_group.sprites())}', False, 'Black')
+        # screen.blit(text_screen, (600, 10))
+        #
+        # # print game score on screen
+        # text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
+        # screen.blit(text_screen, (1200, 10))
 
-        # print jump force list on screen
-        text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
-        screen.blit(text_screen, (10, 50))
+    # LOOP END ##########################################################################
 
-        # print game score list on screen
-        text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
-        screen.blit(text_screen, (10, 90))
-
-        # print enemy list on screen
-        text_screen = game_active_font.render(f'ENEMY group: {len(enemy_group.sprites())}', False, 'Black')
-        screen.blit(text_screen, (600, 10))
-
-        # print game score on screen
-        text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
-        screen.blit(text_screen, (1200, 10))
-
-    # Show frame rate in title bar
-    fps = game_clock.get_fps()
-    pg.display.set_caption(f"My Game - FPS: {fps:.2f}")
+    # # Show frame rate in title bar
+    # fps = game_clock.get_fps()
+    # pg.display.set_caption(f"My Game - FPS: {fps:.2f}")
 
     # update everything
     pg.display.update()
