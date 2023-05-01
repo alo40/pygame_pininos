@@ -223,13 +223,25 @@ class Enemy(pg.sprite.Sprite):
         if type == 'enemy_01':
 
             # enemy_01 frames
-            frame1 = pg.image.load('graphics/eye_sprite1.png').convert_alpha()
-            frame2 = pg.image.load('graphics/eye_sprite2.png').convert_alpha()
-            frame3 = pg.image.load('graphics/eye_sprite3.png').convert_alpha()
-            frame4 = pg.image.load('graphics/eye_sprite2.png').convert_alpha()
+            # frame1 = pg.image.load('graphics/eye_sprite1.png').convert_alpha()
+            # frame2 = pg.image.load('graphics/eye_sprite2.png').convert_alpha()
+            # frame3 = pg.image.load('graphics/eye_sprite3.png').convert_alpha()
+            # frame4 = pg.image.load('graphics/eye_sprite2.png').convert_alpha()
+
+            # enemy_01 new frames
+            frame1 = pg.image.load('graphics/evil_eye_base1.png').convert_alpha()
+            frame2 = pg.image.load('graphics/evil_eye_base2.png').convert_alpha()
+            frame3 = pg.image.load('graphics/evil_eye_base3.png').convert_alpha()
+            frame4 = pg.image.load('graphics/evil_eye_base4.png').convert_alpha()
+            frame5 = pg.image.load('graphics/evil_eye_base5.png').convert_alpha()
+            frame6 = pg.image.load('graphics/evil_eye_base6.png').convert_alpha()
+            frame7 = frame5
+            frame8 = frame4
+            frame9 = frame3
+            frame10 = frame2
 
             # concatenate frames
-            self.frames = [frame1, frame2, frame3, frame4]
+            self.frames = [frame1, frame2, frame3, frame4, frame5, frame6, frame7, frame8, frame9, frame10]
             self.frame_index = 0
 
         else:  # other type of enemy can be used here
@@ -341,7 +353,7 @@ pg.time.set_timer(timer_enemy_01_spawn, 1000)  # tigger event in x ms
 
 # timers enemy_01 animation
 timer_enemy_01_animation = pg.USEREVENT + 3  # +3 is used to avoid conflicts with pygame user events
-pg.time.set_timer(timer_enemy_01_animation, 200)  # tigger event in x ms
+pg.time.set_timer(timer_enemy_01_animation, 250)  # tigger event in x ms
 
 # game loop
 while True:
