@@ -74,7 +74,7 @@ class Hero(pg.sprite.Sprite):
 
         # create image and rect
         self.image = self.frames[self.frame_index]
-        self.rect = self.image.get_rect(midbottom=(200, screen_height - ground_rect.height))
+        self.rect = self.image.get_rect(midbottom=(200, screen_height - ground_height))
 
         # save original rect height and bottom (used in rect resize method)
         self.rect_original_height = self.rect.height
@@ -91,7 +91,7 @@ class Hero(pg.sprite.Sprite):
         self.jumping()
 
         # only for testing
-        # self.draw_boundaries()
+        self.draw_boundaries()
 
     def standing(self):
 
@@ -161,11 +161,11 @@ class Hero(pg.sprite.Sprite):
         # jump in pixels
         self.jump_pixel = - self.jump_velocity * self.jump_timer \
                           + 0.5 * self.gravity * self.jump_timer ** 2
-        self.rect.bottom = screen_height - ground_rect.height + self.jump_pixel
+        self.rect.bottom = screen_height - ground_height + self.jump_pixel
 
         # on ground action
-        if self.rect.bottom >= screen_height - ground_rect.height:
-            self.rect.bottom = screen_height - ground_rect.height
+        if self.rect.bottom >= screen_height - ground_height:
+            self.rect.bottom = screen_height - ground_height
             self.jump_timer = 0  # reset jump timer
             self.action = Action.ON_GROUND
 
@@ -230,7 +230,7 @@ class Enemy(pg.sprite.Sprite):
 
         # obstacle appear at random position
         rand_position_x = randint(1200, 1800)
-        rand_position_y = screen_height - ground_rect.height - randint(0, 300)
+        rand_position_y = screen_height - ground_height - randint(0, 300)
 
         # create Enemy_x image and rect
         self.image = self.frames[self.frame_index]
@@ -269,9 +269,13 @@ class Action(Enum):
 
 
 class Game(Enum):
-    OVER = 1
-    ACTIVE = 2
+    START = 1
+    OVER = 2
     WON = 3
+    DAY_1 = 4
+    DAY_2 = 5
+    DAY_3 = 6
+
 
 ########################################################################################
 # game mode: GAME INIT
@@ -279,7 +283,7 @@ class Game(Enum):
 pg.init()
 
 # set to True for game over / False for game active
-game_mode = Game.ACTIVE
+game_mode = Game.START
 
 # initialize game score
 game_score = 0
@@ -288,6 +292,9 @@ game_score = 0
 screen_width = 1600
 screen_height = 800
 screen = pg.display.set_mode((screen_width, screen_height))  # canvas for everything!
+
+# ground setup (global variable)
+ground_height = 200
 
 # set game title
 pg.display.set_caption('pininos')
@@ -299,17 +306,13 @@ game_over_font = pg.font.Font('font/Pixeltype.ttf', 200)
 # create clock object to control the frame rates
 game_clock = pg.time.Clock()
 
-# create ground surface
-ground_surf = pg.image.load('graphics/ground_1600x200.png').convert()
-ground_rect = ground_surf.get_rect(bottomleft=(0, screen_height))
+# # create ground surface
+# ground_surf = pg.image.load('graphics/ground_1600x200.png').convert()
+# ground_rect = ground_surf.get_rect(bottomleft=(0, screen_height))
 
 # # create sky surface
 # sky_surf = pg.Surface((screen_width, screen_height - ground_rect.height))
 # sky_surf.fill('#EFBBEB')  # light purple
-
-# create horizon surface
-horizon_surf = pg.image.load('graphics/horizont_day_3.png').convert()
-horizon_rect = horizon_surf.get_rect(topleft=(0, 0))
 
 # declare hero group and hero
 hero = pg.sprite.GroupSingle()
@@ -350,7 +353,7 @@ while True:
 
         # TIMER EVENT: HERO STANDING ANIMATION
         if event.type == timer_hero_standing_animation \
-                and game_mode == Game.ACTIVE \
+                and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3) \
                 and hero.sprite.action == Action.ON_GROUND \
                 and hero.sprite.jump_force == 0:  # to avoid conflict with crouch animation
 
@@ -358,13 +361,15 @@ while True:
             hero.sprite.standing()
 
         # TIMER EVENT: ENEMY_01 SPAWN
-        if event.type == timer_enemy_01_spawn and game_mode == Game.ACTIVE:
+        if event.type == timer_enemy_01_spawn \
+                and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3):
 
             # add new element to enemy group
             enemy_group.add(Enemy('enemy_01'))
 
         # TIMER EVENT: ENEMY_01 ANIMATION
-        if event.type == timer_enemy_01_animation and game_mode == Game.ACTIVE:
+        if event.type == timer_enemy_01_animation \
+                and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3):
 
             # enemy animation
             if len(enemy_group.sprites()) == 0:
@@ -374,22 +379,35 @@ while True:
                     enemy.animation()
 
     #####################################################################################
-    # game mode: GAME OVER/GAME WON
+    # game mode: GAME START/OVER/WON
     #####################################################################################
-    if game_mode == Game.OVER or game_mode == Game.WON:
+    if game_mode == Game.START or game_mode == Game.WON or game_mode == Game.OVER:
+
+        # colors
+        if game_mode == Game.START:
+            fill_color = 'lightblue'
+            text_color = 'blue'
+
+        elif game_mode == Game.WON:
+            fill_color = 'lightyellow'
+            text_color = 'orange'
+
+        else:  # default (game over)
+            fill_color = 'black'
+            text_color = 'red'
 
         # black screen
-        screen.fill('Black')
+        screen.fill(fill_color)
 
         # game over text (big font)
-        text_game_over = game_over_font.render(f"GAME {game_mode.name}", True, 'Red')
-        game_over_rect = text_game_over.get_rect(center=(screen_width / 2, screen_height / 2))
-        screen.blit(text_game_over, game_over_rect)
+        game_mode_text = game_over_font.render(f"GAME {game_mode.name}", True, text_color)
+        game_mode_rect = game_mode_text.get_rect(center=(screen_width / 2, screen_height / 2))
+        screen.blit(game_mode_text, game_mode_rect)
 
         # restart text (small font)
-        text_game_restart = game_active_font.render(f"press SPACE to restart", True, 'Red')
-        game_restart_rect = text_game_restart.get_rect(center=(screen_width / 2, (screen_height / 2) + 100))
-        screen.blit(text_game_restart, game_restart_rect)
+        game_restart_text = game_active_font.render(f"press SPACE to continue", True, text_color)
+        game_restart_rect = game_restart_text.get_rect(center=(screen_width / 2, (screen_height / 2) + 100))
+        screen.blit(game_restart_text, game_restart_rect)
 
         # restart enemy_01 rectangle list
         enemy_group.empty()
@@ -402,7 +420,7 @@ while True:
 
             # restart hero and enemies position
             hero.sprite.rect.x = 200
-            hero.sprite.rect.bottom = screen_height - ground_rect.height
+            hero.sprite.rect.bottom = screen_height - ground_height
             # enemy_02_rect.x = 1000
 
             # restart jump parameters
@@ -414,12 +432,16 @@ while True:
             game_score = 0
 
             # restart game
-            game_mode = Game.ACTIVE
+            game_mode = Game.DAY_3
 
     #####################################################################################
     # game mode: GAME ACTIVE
     #####################################################################################
-    elif game_mode == Game.ACTIVE:
+    elif game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3:
+
+        # create horizon surface
+        horizon_surf = pg.image.load(f'graphics/horizont_{game_mode.name}.png').convert()
+        horizon_rect = horizon_surf.get_rect(topleft=(0, 0))
 
         # draw background
         screen.blit(horizon_surf, (0, 0))
@@ -456,35 +478,35 @@ while True:
 
         # GRID LINES  ###################################################################
 
-        # # Draw the horizontal lines of the grid
-        # for y in range(0, screen_height, 50):
-        #     pg.draw.line(screen, 'Black', (0, y), (screen_width, y))
-        #
-        # # Draw the vertical lines of the grid
-        # for x in range(0, screen_width, 50):
-        #     pg.draw.line(screen, 'Black', (x, 0), (x, screen_height))
+        # Draw the horizontal lines of the grid
+        for y in range(0, screen_height, 50):
+            pg.draw.line(screen, 'Black', (0, y), (screen_width, y))
+
+        # Draw the vertical lines of the grid
+        for x in range(0, screen_width, 50):
+            pg.draw.line(screen, 'Black', (x, 0), (x, screen_height))
 
         # TEXT MESSAGES #################################################################
 
-        # # print hero action on screen
-        # text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
-        # screen.blit(text_screen, (10, 10))
-        #
-        # # print jump force list on screen
-        # text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
-        # screen.blit(text_screen, (10, 50))
-        #
-        # # print game score list on screen
-        # text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
-        # screen.blit(text_screen, (10, 90))
-        #
-        # # print enemy list on screen
-        # text_screen = game_active_font.render(f'ENEMY group: {len(enemy_group.sprites())}', False, 'Black')
-        # screen.blit(text_screen, (600, 10))
-        #
-        # # print game score on screen
-        # text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
-        # screen.blit(text_screen, (1200, 10))
+        # print hero action on screen
+        text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
+        screen.blit(text_screen, (10, 10))
+
+        # print jump force list on screen
+        text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
+        screen.blit(text_screen, (10, 50))
+
+        # print game score list on screen
+        text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
+        screen.blit(text_screen, (10, 90))
+
+        # print enemy list on screen
+        text_screen = game_active_font.render(f'ENEMY group: {len(enemy_group.sprites())}', False, 'Black')
+        screen.blit(text_screen, (600, 10))
+
+        # print game score on screen
+        text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
+        screen.blit(text_screen, (1200, 10))
 
     # LOOP END ##########################################################################
 
