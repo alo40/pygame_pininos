@@ -206,12 +206,19 @@ class Hero(pg.sprite.Sprite):
 
 class Enemy(pg.sprite.Sprite):
 
-    def __init__(self, type):
+    def __init__(self, type, game_mode):
         super().__init__()
 
-        # parameters
-        self.move_speed = 10
-        self.hero_dodge = False  # used for the score
+        # enemy speed depending on the day
+        if game_mode == Game.DAY_3:
+            self.move_speed = 20
+        elif game_mode == Game.DAY_2:
+            self.move_speed = 15
+        else:  # default DAY_1
+            self.move_speed = 10
+
+        # parameter used for the score
+        self.hero_dodge = False
 
         if type == 'enemy_01':
 
@@ -365,7 +372,7 @@ while True:
                 and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3):
 
             # add new element to enemy group
-            enemy_group.add(Enemy('enemy_01'))
+            enemy_group.add(Enemy('enemy_01', game_mode))
 
         # TIMER EVENT: ENEMY_01 ANIMATION
         if event.type == timer_enemy_01_animation \
@@ -432,7 +439,15 @@ while True:
             game_score = 0
 
             # restart game
-            game_mode = Game.DAY_3
+            game_mode = Game.DAY_1
+
+            # set enemy spawn timer depending on the day
+            if game_mode == Game.DAY_3:
+                pg.time.set_timer(timer_enemy_01_spawn, 600)
+            elif game_mode == Game.DAY_2:
+                pg.time.set_timer(timer_enemy_01_spawn, 800)
+            else:  # default DAY_1
+                pg.time.set_timer(timer_enemy_01_spawn, 1000)
 
     #####################################################################################
     # game mode: GAME ACTIVE
@@ -460,7 +475,7 @@ while True:
         if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
             text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
             screen.blit(text_collision, (600, 50))
-            game_mode = Game.OVER  # GAME OVER!
+            # game_mode = Game.OVER  # GAME OVER!
 
         # GAME SCORE ####################################################################
 
