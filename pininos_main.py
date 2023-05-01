@@ -206,9 +206,9 @@ class Enemy(pg.sprite.Sprite):
 
         # enemy speed depending on the day
         if game_mode == Game.DAY_3:
-            self.move_speed = 8
+            self.move_speed = 12
         elif game_mode == Game.DAY_2:
-            self.move_speed = 8
+            self.move_speed = 10
         else:  # default DAY_1
             self.move_speed = 8
 
@@ -392,7 +392,7 @@ while True:
         if game_mode == Game.START:
             fill_color = 'lightblue'
             text_color = 'blue'
-            text_message = f"GAME {game_mode.name}"
+            text_message = f"PININOS a game of JUMPS!!"
 
         elif game_mode == Game.WON:
             fill_color = 'lightyellow'
@@ -407,7 +407,7 @@ while True:
         else:  # game_mode = Game.NEXT
             fill_color = 'lightyellow'
             text_color = 'orange'
-            text_message = "NEXT_LEVEL"
+            text_message = "NEXT LEVEL"
 
         # black screen
         screen.fill(fill_color)
@@ -492,7 +492,7 @@ while True:
             text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
             screen.blit(text_collision, (600, 50))
             game_day = game_mode  # save game day
-            # game_mode = Game.OVER  # GAME OVER!
+            game_mode = Game.OVER  # GAME OVER!
 
         # GAME SCORE ####################################################################
 
