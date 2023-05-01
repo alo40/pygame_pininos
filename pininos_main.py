@@ -229,12 +229,12 @@ class Enemy(pg.sprite.Sprite):
             # frame4 = pg.image.load('graphics/eye_sprite2.png').convert_alpha()
 
             # enemy_01 new frames
-            frame1 = pg.image.load('graphics/evil_eye_base1.png').convert_alpha()
-            frame2 = pg.image.load('graphics/evil_eye_base2.png').convert_alpha()
-            frame3 = pg.image.load('graphics/evil_eye_base3.png').convert_alpha()
-            frame4 = pg.image.load('graphics/evil_eye_base4.png').convert_alpha()
-            frame5 = pg.image.load('graphics/evil_eye_base5.png').convert_alpha()
-            frame6 = pg.image.load('graphics/evil_eye_base6.png').convert_alpha()
+            frame1 = pg.image.load('graphics/evil_eye_mini1.png').convert_alpha()
+            frame2 = pg.image.load('graphics/evil_eye_mini2.png').convert_alpha()
+            frame3 = pg.image.load('graphics/evil_eye_mini3.png').convert_alpha()
+            frame4 = pg.image.load('graphics/evil_eye_mini4.png').convert_alpha()
+            frame5 = pg.image.load('graphics/evil_eye_mini5.png').convert_alpha()
+            frame6 = pg.image.load('graphics/evil_eye_mini6.png').convert_alpha()
             frame7 = frame5
             frame8 = frame4
             frame9 = frame3
