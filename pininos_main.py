@@ -24,11 +24,6 @@ from sys import exit
 from random import randint, choice  # choice will be used to random spawn different types of enemies
 from enum import Enum
 
-# debugs for console mode
-# import pdb; pdb.set_trace()
-# import debugpy
-# debugpy.listen(("localhost", 5678))
-
 
 class Hero(pg.sprite.Sprite):
 
@@ -211,22 +206,16 @@ class Enemy(pg.sprite.Sprite):
 
         # enemy speed depending on the day
         if game_mode == Game.DAY_3:
-            self.move_speed = 20
+            self.move_speed = 8
         elif game_mode == Game.DAY_2:
-            self.move_speed = 15
+            self.move_speed = 8
         else:  # default DAY_1
-            self.move_speed = 10
+            self.move_speed = 8
 
         # parameter used for the score
         self.hero_dodge = False
 
         if type == 'enemy_01':
-
-            # enemy_01 frames
-            # frame1 = pg.image.load('graphics/eye_sprite1.png').convert_alpha()
-            # frame2 = pg.image.load('graphics/eye_sprite2.png').convert_alpha()
-            # frame3 = pg.image.load('graphics/eye_sprite3.png').convert_alpha()
-            # frame4 = pg.image.load('graphics/eye_sprite2.png').convert_alpha()
 
             # enemy_01 new frames
             frame1 = pg.image.load('graphics/evil_eye_mini1.png').convert_alpha()
@@ -294,6 +283,7 @@ class Game(Enum):
     DAY_1 = 4
     DAY_2 = 5
     DAY_3 = 6
+    NEXT = 7
 
 
 ########################################################################################
@@ -303,6 +293,7 @@ pg.init()
 
 # set to True for game over / False for game active
 game_mode = Game.START
+game_day = Game.DAY_1  # default
 
 # initialize game score
 game_score = 0
@@ -325,14 +316,6 @@ game_over_font = pg.font.Font('font/Pixeltype.ttf', 200)
 # create clock object to control the frame rates
 game_clock = pg.time.Clock()
 
-# # create ground surface
-# ground_surf = pg.image.load('graphics/ground_1600x200.png').convert()
-# ground_rect = ground_surf.get_rect(bottomleft=(0, screen_height))
-
-# # create sky surface
-# sky_surf = pg.Surface((screen_width, screen_height - ground_rect.height))
-# sky_surf.fill('#EFBBEB')  # light purple
-
 # declare hero group and hero
 hero = pg.sprite.GroupSingle()
 hero.add(Hero())
@@ -353,7 +336,7 @@ pg.time.set_timer(timer_enemy_01_spawn, 1000)  # tigger event in x ms
 
 # timers enemy_01 animation
 timer_enemy_01_animation = pg.USEREVENT + 3  # +3 is used to avoid conflicts with pygame user events
-pg.time.set_timer(timer_enemy_01_animation, 250)  # tigger event in x ms
+pg.time.set_timer(timer_enemy_01_animation, 200)  # tigger event in x ms
 
 # game loop
 while True:
@@ -398,28 +381,39 @@ while True:
                     enemy.animation()
 
     #####################################################################################
-    # game mode: GAME START/OVER/WON
+    # game mode: GAME START/OVER/WON/NEXT
     #####################################################################################
-    if game_mode == Game.START or game_mode == Game.WON or game_mode == Game.OVER:
+    if game_mode == Game.START \
+            or game_mode == Game.WON \
+            or game_mode == Game.OVER \
+            or game_mode == Game.NEXT:
 
         # colors
         if game_mode == Game.START:
             fill_color = 'lightblue'
             text_color = 'blue'
+            text_message = f"GAME {game_mode.name}"
 
         elif game_mode == Game.WON:
             fill_color = 'lightyellow'
             text_color = 'orange'
+            text_message = f"GAME {game_mode.name}"
 
-        else:  # default (game over)
+        elif game_mode == Game.OVER:
             fill_color = 'black'
             text_color = 'red'
+            text_message = f"GAME {game_mode.name}"
+
+        else:  # game_mode = Game.NEXT
+            fill_color = 'lightyellow'
+            text_color = 'orange'
+            text_message = "NEXT_LEVEL"
 
         # black screen
         screen.fill(fill_color)
 
         # game over text (big font)
-        game_mode_text = game_over_font.render(f"GAME {game_mode.name}", True, text_color)
+        game_mode_text = game_over_font.render(text_message, True, text_color)
         game_mode_rect = game_mode_text.get_rect(center=(screen_width / 2, screen_height / 2))
         screen.blit(game_mode_text, game_mode_rect)
 
@@ -451,7 +445,17 @@ while True:
             game_score = 0
 
             # restart game
-            game_mode = Game.DAY_1
+            if game_mode == Game.NEXT:
+                if game_day == Game.DAY_1:
+                    game_mode = Game.DAY_2
+                elif game_day == Game.DAY_2:
+                    game_mode = Game.DAY_3
+
+            elif game_mode == Game.WON:
+                game_mode = Game.DAY_1  # restart game
+
+            else:  # default game start
+                game_mode = game_day  # continue from current day
 
             # set enemy spawn timer depending on the day
             if game_mode == Game.DAY_3:
@@ -487,6 +491,7 @@ while True:
         if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
             text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
             screen.blit(text_collision, (600, 50))
+            game_day = game_mode  # save game day
             # game_mode = Game.OVER  # GAME OVER!
 
         # GAME SCORE ####################################################################
@@ -500,8 +505,13 @@ while True:
                 game_score += 1
                 enemy.hero_dodge = True  # to avoid more than one score increment
 
+        # win score selection
         if game_score >= 20:
-            game_mode = Game.WON
+            if game_mode == Game.DAY_3:
+                game_mode = Game.WON  # GAME END!
+            else:
+                game_day = game_mode  # save day for next level
+                game_mode = Game.NEXT
 
         # GRID LINES  ###################################################################
 
