@@ -133,9 +133,9 @@ class Hero(pg.sprite.Sprite):
 
         elif not self.action == Action.JUMPING:
 
-            # # play jump sound (only once)
-            # if pg.mixer.get_busy() == 0 and self.jump_force > 0:
-            #     self.jump_sound.play()
+            # play jump sound (only once)
+            if pg.mixer.get_busy() == 0 and self.jump_force > 0:
+                self.jump_sound.play()
 
             # initiate jump timer > 0
             self.jump_velocity = self.jump_force
@@ -290,6 +290,12 @@ class Game(Enum):
 # game mode: GAME INIT
 #########################################################################################
 pg.init()
+
+# load background music
+pg.mixer.music.load("audio/chill-abstract-intention-12099.mp3")
+
+# play background music (infinite loop)
+pg.mixer.music.play(-1)
 
 # set to True for game over / False for game active
 game_mode = Game.START
@@ -476,8 +482,6 @@ while True:
 
         # draw background
         screen.blit(horizon_surf, (0, 0))
-        # screen.blit(sky_surf, (0, 0))  # (x, y) position
-        # screen.blit(ground_surf, (0, screen_height - ground_rect.height))
 
         # draw second hero using sprites
         hero.draw(screen)
@@ -544,6 +548,10 @@ while True:
         # print game score on screen
         text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
         screen.blit(text_screen, (1200, 10))
+
+        # print music credit
+        text_screen = game_active_font.render("Music by Coma-Media from Pixabay", False, 'Black')
+        screen.blit(text_screen, (1000, 750))
 
     # LOOP END ##########################################################################
 
