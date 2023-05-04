@@ -291,12 +291,6 @@ class Game(Enum):
 #########################################################################################
 pg.init()
 
-# load background music
-pg.mixer.music.load("audio/chill-abstract-intention-12099.mp3")
-
-# play background music (infinite loop)
-pg.mixer.music.play(-1)
-
 # set to True for game over / False for game active
 game_mode = Game.START
 game_day = Game.DAY_1  # default
@@ -321,6 +315,9 @@ game_over_font = pg.font.Font('font/Pixeltype.ttf', 200)
 
 # create clock object to control the frame rates
 game_clock = pg.time.Clock()
+
+# for background music
+play_music = True
 
 # declare hero group and hero
 hero = pg.sprite.GroupSingle()
@@ -400,6 +397,12 @@ while True:
             text_color = 'blue'
             text_message = f"PININOS a game of JUMPS!!"
 
+            if play_music:
+                pg.mixer.music.load("audio/chill-abstract-intention-12099.mp3")
+                pg.mixer.music.play(-1)
+                text_music = "Music by Coma-Media from Pixabay"
+                play_music = False
+
         elif game_mode == Game.WON:
             fill_color = 'lightyellow'
             text_color = 'orange'
@@ -409,6 +412,12 @@ while True:
             fill_color = 'black'
             text_color = 'red'
             text_message = f"GAME {game_mode.name}"
+
+            if play_music:
+                pg.mixer.music.load("audio/cinematic-dramatic-11120.mp3")
+                pg.mixer.music.play(-1)
+                text_music = "Music by AleXZavesa from Pixabay"
+                play_music = False
 
         else:  # game_mode = Game.NEXT
             fill_color = 'lightyellow'
@@ -427,6 +436,10 @@ while True:
         game_restart_text = game_active_font.render(f"press SPACE to continue", True, text_color)
         game_restart_rect = game_restart_text.get_rect(center=(screen_width / 2, (screen_height / 2) + 100))
         screen.blit(game_restart_text, game_restart_rect)
+
+        # print music credit
+        text_screen = game_active_font.render(text_music, False, text_color)
+        screen.blit(text_screen, (1000, 750))
 
         # restart enemy_01 rectangle list
         enemy_group.empty()
@@ -449,6 +462,9 @@ while True:
 
             # reset game score
             game_score = 0
+
+            # restart background music
+            play_music = True
 
             # restart game
             if game_mode == Game.NEXT:
@@ -498,7 +514,7 @@ while True:
             game_day = game_mode  # save game day
             game_mode = Game.OVER  # GAME OVER!
 
-        # GAME SCORE ####################################################################
+        # GAME SCORE  ###################################################################
 
         # count game score
         # if len(enemy_group) > 0:
@@ -516,6 +532,11 @@ while True:
             else:
                 game_day = game_mode  # save day for next level
                 game_mode = Game.NEXT
+
+        # MUSIC  #########################################################################
+
+        # Stop the music when the game is over
+        pg.mixer.music.stop()
 
         # GRID LINES  ###################################################################
 
@@ -548,10 +569,6 @@ while True:
         # print game score on screen
         text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
         screen.blit(text_screen, (1200, 10))
-
-        # print music credit
-        text_screen = game_active_font.render("Music by Coma-Media from Pixabay", False, 'Black')
-        screen.blit(text_screen, (1000, 750))
 
     # LOOP END ##########################################################################
 
