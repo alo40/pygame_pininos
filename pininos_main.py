@@ -395,11 +395,11 @@ while True:
         if game_mode == Game.START:
             fill_color = 'lightblue'
             text_color = 'blue'
-            text_message = f"PININOS a game of JUMPS!!"
+            text_message = "PININOS' a game of JUMPS!!"
 
             if play_music:
                 pg.mixer.music.load("audio/chill-abstract-intention-12099.mp3")
-                pg.mixer.music.play(-1)
+                pg.mixer.music.play(-1)  # -1 to play it continuosly
                 text_music = "Music by Coma-Media from Pixabay"
                 play_music = False
 
@@ -414,15 +414,21 @@ while True:
             text_message = f"GAME {game_mode.name}"
 
             if play_music:
-                pg.mixer.music.load("audio/cinematic-dramatic-11120.mp3")
-                pg.mixer.music.play(-1)
-                text_music = "Music by AleXZavesa from Pixabay"
+                pg.mixer.music.load("audio/76376__deleted_user_877451__game_over.wav")
+                pg.mixer.music.play()
+                text_music = "Sound by deleted_user_877451"
                 play_music = False
 
         else:  # game_mode = Game.NEXT
             fill_color = 'lightyellow'
             text_color = 'orange'
             text_message = "NEXT LEVEL"
+
+        # if play_music:  # Game.END (not implemented)
+        #     pg.mixer.music.load("audio/cinematic-dramatic-11120.mp3")
+        #     pg.mixer.music.play(-1)
+        #     text_music = "Music by AleXZavesa from Pixabay"
+        #     play_music = False
 
         # black screen
         screen.fill(fill_color)
@@ -507,12 +513,21 @@ while True:
         enemy_group.draw(screen)
         enemy_group.update()
 
+        # play/stop background music
+        # pg.mixer.music.stop()
+        if play_music:
+            pg.mixer.music.load("audio/chill-ambient-11322.mp3")
+            pg.mixer.music.play(-1)
+            text_music = "Music by Coma-Media from Pixabay"
+            play_music = False
+
         # hero collision with enemy_group!
         if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
             text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
             screen.blit(text_collision, (600, 50))
             game_day = game_mode  # save game day
             game_mode = Game.OVER  # GAME OVER!
+            play_music = True  # to change background music
 
         # GAME SCORE  ###################################################################
 
@@ -532,11 +547,6 @@ while True:
             else:
                 game_day = game_mode  # save day for next level
                 game_mode = Game.NEXT
-
-        # MUSIC  #########################################################################
-
-        # Stop the music when the game is over
-        pg.mixer.music.stop()
 
         # GRID LINES  ###################################################################
 
@@ -569,6 +579,10 @@ while True:
         # print game score on screen
         text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
         screen.blit(text_screen, (1200, 10))
+
+        # print music credit
+        text_screen = game_active_font.render(text_music, False, 'Black')
+        screen.blit(text_screen, (1000, 750))
 
     # LOOP END ##########################################################################
 
