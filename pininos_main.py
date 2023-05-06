@@ -40,27 +40,31 @@ class Hero(pg.sprite.Sprite):
         self.gravity = 10
         self.action = Action.ON_GROUND
 
+        # hero model
+        model = 'soldier'
+        # model = 'stickman'
+
         # standing frames
-        stand_01 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()
-        stand_02 = pg.image.load('graphics/soldier_simple_standing2.png').convert_alpha()
-        stand_03 = pg.image.load('graphics/soldier_simple_standing1.png').convert_alpha()
+        stand_01 = pg.image.load(f'graphics/{model}/{model}_standing1.png').convert_alpha()
+        stand_02 = pg.image.load(f'graphics/{model}/{model}_standing2.png').convert_alpha()
+        stand_03 = pg.image.load(f'graphics/{model}/{model}_standing1.png').convert_alpha()
         stand_04 = stand_02
         standing_frames = [stand_01, stand_02, stand_03, stand_04]
 
         # crouching frames
-        crouch_01 = pg.image.load('graphics/soldier_simple_jumping2.png').convert_alpha()
-        crouch_02 = pg.image.load('graphics/soldier_simple_jumping3.png').convert_alpha()
-        crouch_03 = pg.image.load('graphics/soldier_simple_jumping4.png').convert_alpha()
-        crouch_04 = pg.image.load('graphics/soldier_simple_jumping5.png').convert_alpha()
-        crouch_05 = pg.image.load('graphics/soldier_simple_jumping6.png').convert_alpha()
-        crouch_06 = pg.image.load('graphics/soldier_simple_jumping7.png').convert_alpha()
-        crouch_07 = pg.image.load('graphics/soldier_simple_jumping8.png').convert_alpha()
-        crouch_08 = pg.image.load('graphics/soldier_simple_jumping9.png').convert_alpha()
+        crouch_01 = pg.image.load(f'graphics/{model}/{model}_jumping2.png').convert_alpha()
+        crouch_02 = pg.image.load(f'graphics/{model}/{model}_jumping3.png').convert_alpha()
+        crouch_03 = pg.image.load(f'graphics/{model}/{model}_jumping4.png').convert_alpha()
+        crouch_04 = pg.image.load(f'graphics/{model}/{model}_jumping5.png').convert_alpha()
+        crouch_05 = pg.image.load(f'graphics/{model}/{model}_jumping6.png').convert_alpha()
+        crouch_06 = pg.image.load(f'graphics/{model}/{model}_jumping7.png').convert_alpha()
+        crouch_07 = pg.image.load(f'graphics/{model}/{model}_jumping8.png').convert_alpha()
+        crouch_08 = pg.image.load(f'graphics/{model}/{model}_jumping9.png').convert_alpha()
         crouching_frames = [crouch_01, crouch_02, crouch_03, crouch_04,
                             crouch_05, crouch_06, crouch_07, crouch_08]
 
         # jumping frames
-        jump_01 = pg.image.load('graphics/soldier_simple_jumping10.png').convert_alpha()  # jumping
+        jump_01 = pg.image.load(f'graphics/{model}/{model}_jumping10.png').convert_alpha()  # jumping
         jumping_frames = [jump_01]
 
         # concatenate all animation frames
@@ -413,11 +417,11 @@ while True:
             text_color = 'red'
             text_message = f"GAME {game_mode.name}"
 
-            if play_music:
-                pg.mixer.music.load("audio/76376__deleted_user_877451__game_over.wav")
-                pg.mixer.music.play()
-                text_music = "Sound by deleted_user_877451"
-                play_music = False
+            # if play_music:
+            #     pg.mixer.music.load("audio/76376__deleted_user_877451__game_over.wav")
+            #     pg.mixer.music.play()
+            #     text_music = "Sound by deleted_user_877451"
+            #     play_music = False
 
         else:  # game_mode = Game.NEXT
             fill_color = 'lightyellow'
@@ -498,6 +502,30 @@ while True:
     #####################################################################################
     elif game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3:
 
+        # PLAY MUSIC  ###################################################################
+
+        # play/stop background music
+        if play_music:
+            if game_mode == Game.DAY_1:
+                pg.mixer.music.load("audio/chill-ambient-11322.mp3")
+                pg.mixer.music.play(-1)
+                text_music = "Music by Coma-Media from Pixabay"
+                play_music = False
+
+            elif game_mode == Game.DAY_2:
+                pg.mixer.music.load("audio/middle-east-127104.mp3")
+                pg.mixer.music.play(-1)
+                text_music = "Music by AlexiAction from Pixabay"
+                play_music = False
+
+            elif game_mode == Game.DAY_3:
+                pg.mixer.music.load("audio/sinister-night-halloween-trap-hip-hop-music-121202.mp3")
+                pg.mixer.music.play(-1)
+                text_music = "Music by SoulProdMusic from Pixabay"
+                play_music = False
+
+        # SURFACE AND COLLISIONS  #######################################################S
+
         # create horizon surface
         horizon_surf = pg.image.load(f'graphics/horizont_{game_mode.name}.png').convert()
         horizon_rect = horizon_surf.get_rect(topleft=(0, 0))
@@ -512,14 +540,6 @@ while True:
         # draws class Enemy
         enemy_group.draw(screen)
         enemy_group.update()
-
-        # play/stop background music
-        # pg.mixer.music.stop()
-        if play_music:
-            pg.mixer.music.load("audio/chill-ambient-11322.mp3")
-            pg.mixer.music.play(-1)
-            text_music = "Music by Coma-Media from Pixabay"
-            play_music = False
 
         # hero collision with enemy_group!
         if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
