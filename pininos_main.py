@@ -24,6 +24,12 @@ from sys import exit
 from random import randint, choice  # choice will be used to random spawn different types of enemies
 from enum import Enum
 
+# GLOBAL variables
+ground_height = 200
+screen_width = 1600
+screen_height = 800
+screen = pg.display.set_mode((screen_width, screen_height))  # canvas for everything!
+
 
 class Hero(pg.sprite.Sprite):
 
@@ -290,326 +296,323 @@ class Game(Enum):
     NEXT = 7
 
 
-########################################################################################
-# game mode: GAME INIT
-#########################################################################################
-pg.init()
+def main():
+    ########################################################################################
+    # game mode: GAME INIT
+    #########################################################################################
+    pg.init()
 
-# set to True for game over / False for game active
-game_mode = Game.START
-game_day = Game.DAY_1  # default
+    # set to True for game over / False for game active
+    game_mode = Game.START
+    game_day = Game.DAY_1  # default
 
-# initialize game score
-game_score = 0
+    # initialize game score
+    game_score = 0
 
-# screen setup (global variables)
-screen_width = 1600
-screen_height = 800
-screen = pg.display.set_mode((screen_width, screen_height))  # canvas for everything!
+    # set game title
+    pg.display.set_caption('pininos')
 
-# ground setup (global variable)
-ground_height = 200
+    # create fonts
+    game_active_font = pg.font.Font('font/Pixeltype.ttf', 50)
+    game_over_font = pg.font.Font('font/Pixeltype.ttf', 200)
 
-# set game title
-pg.display.set_caption('pininos')
+    # create clock object to control the frame rates
+    game_clock = pg.time.Clock()
 
-# create fonts
-game_active_font = pg.font.Font('font/Pixeltype.ttf', 50)
-game_over_font = pg.font.Font('font/Pixeltype.ttf', 200)
+    # for background music
+    play_music = True
 
-# create clock object to control the frame rates
-game_clock = pg.time.Clock()
+    # declare hero group and hero
+    hero = pg.sprite.GroupSingle()
+    hero.add(Hero())
 
-# for background music
-play_music = True
+    # hero action init
+    hero_action = Action.ON_GROUND
 
-# declare hero group and hero
-hero = pg.sprite.GroupSingle()
-hero.add(Hero())
+    # declare enemy group
+    enemy_group = pg.sprite.Group()
 
-# hero action init
-hero_action = Action.ON_GROUND
+    # timers hero standing animation
+    timer_hero_standing_animation = pg.USEREVENT + 1  # +2 is used to avoid conflicts with pygame user events
+    pg.time.set_timer(timer_hero_standing_animation, 200)  # tigger event in x ms
 
-# declare enemy group
-enemy_group = pg.sprite.Group()
+    # timers enemy_01 spawn
+    timer_enemy_01_spawn = pg.USEREVENT + 2  # +1 is used to avoid conflicts with pygame user events
+    pg.time.set_timer(timer_enemy_01_spawn, 1000)  # tigger event in x ms
 
-# timers hero standing animation
-timer_hero_standing_animation = pg.USEREVENT + 1  # +2 is used to avoid conflicts with pygame user events
-pg.time.set_timer(timer_hero_standing_animation, 200)  # tigger event in x ms
+    # timers enemy_01 animation
+    timer_enemy_01_animation = pg.USEREVENT + 3  # +3 is used to avoid conflicts with pygame user events
+    pg.time.set_timer(timer_enemy_01_animation, 200)  # tigger event in x ms
 
-# timers enemy_01 spawn
-timer_enemy_01_spawn = pg.USEREVENT + 2  # +1 is used to avoid conflicts with pygame user events
-pg.time.set_timer(timer_enemy_01_spawn, 1000)  # tigger event in x ms
+    # game loop
+    while True:
 
-# timers enemy_01 animation
-timer_enemy_01_animation = pg.USEREVENT + 3  # +3 is used to avoid conflicts with pygame user events
-pg.time.set_timer(timer_enemy_01_animation, 200)  # tigger event in x ms
+        #####################################################################################
+        # game mode: EVENTS
+        #####################################################################################
 
-# game loop
-while True:
+        # loop through events
+        for event in pg.event.get():
 
-    #####################################################################################
-    # game mode: EVENTS
-    #####################################################################################
+            # EVENT: QUIT BUTTON
+            if event.type == pg.QUIT:  # QUIT = x button of the window
+                pg.quit()
+                exit() # to close the while: True loop
 
-    # loop through events
-    for event in pg.event.get():
+            # TIMER EVENT: HERO STANDING ANIMATION
+            if event.type == timer_hero_standing_animation \
+                    and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3) \
+                    and hero.sprite.action == Action.ON_GROUND \
+                    and hero.sprite.jump_force == 0:  # to avoid conflict with crouch animation
 
-        # EVENT: QUIT BUTTON
-        if event.type == pg.QUIT:  # QUIT = x button of the window
-            pg.quit()
-            exit() # to close the while: True loop
+                # update hero image
+                hero.sprite.standing()
 
-        # TIMER EVENT: HERO STANDING ANIMATION
-        if event.type == timer_hero_standing_animation \
-                and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3) \
-                and hero.sprite.action == Action.ON_GROUND \
-                and hero.sprite.jump_force == 0:  # to avoid conflict with crouch animation
+            # TIMER EVENT: ENEMY_01 SPAWN
+            if event.type == timer_enemy_01_spawn \
+                    and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3):
 
-            # update hero image
-            hero.sprite.standing()
+                # add new element to enemy group
+                enemy_group.add(Enemy('enemy_01', game_mode))
 
-        # TIMER EVENT: ENEMY_01 SPAWN
-        if event.type == timer_enemy_01_spawn \
-                and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3):
+            # TIMER EVENT: ENEMY_01 ANIMATION
+            if event.type == timer_enemy_01_animation \
+                    and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3):
 
-            # add new element to enemy group
-            enemy_group.add(Enemy('enemy_01', game_mode))
+                # enemy animation
+                if len(enemy_group.sprites()) == 0:
+                    pass
+                else:
+                    for enemy in enemy_group.sprites():
+                        enemy.animation()
 
-        # TIMER EVENT: ENEMY_01 ANIMATION
-        if event.type == timer_enemy_01_animation \
-                and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3):
+        #####################################################################################
+        # game mode: GAME START/OVER/WON/NEXT
+        #####################################################################################
+        if game_mode == Game.START \
+                or game_mode == Game.WON \
+                or game_mode == Game.OVER \
+                or game_mode == Game.NEXT:
 
-            # enemy animation
-            if len(enemy_group.sprites()) == 0:
-                pass
-            else:
-                for enemy in enemy_group.sprites():
-                    enemy.animation()
+            # colors
+            if game_mode == Game.START:
+                fill_color = 'lightblue'
+                text_color = 'blue'
+                text_message = "PININOS' a game of JUMPS!!"
 
-    #####################################################################################
-    # game mode: GAME START/OVER/WON/NEXT
-    #####################################################################################
-    if game_mode == Game.START \
-            or game_mode == Game.WON \
-            or game_mode == Game.OVER \
-            or game_mode == Game.NEXT:
-
-        # colors
-        if game_mode == Game.START:
-            fill_color = 'lightblue'
-            text_color = 'blue'
-            text_message = "PININOS' a game of JUMPS!!"
-
-            if play_music:
-                pg.mixer.music.load("audio/chill-abstract-intention-12099.mp3")
-                pg.mixer.music.play(-1)  # -1 to play it continuosly
-                text_music = "Music by Coma-Media from Pixabay"
-                play_music = False
-
-        elif game_mode == Game.WON:
-            fill_color = 'lightyellow'
-            text_color = 'orange'
-            text_message = f"GAME {game_mode.name}"
-
-        elif game_mode == Game.OVER:
-            fill_color = 'black'
-            text_color = 'red'
-            text_message = f"GAME {game_mode.name}"
-
-            # if play_music:
-            #     pg.mixer.music.load("audio/76376__deleted_user_877451__game_over.wav")
-            #     pg.mixer.music.play()
-            #     text_music = "Sound by deleted_user_877451"
-            #     play_music = False
-
-        else:  # game_mode = Game.NEXT
-            fill_color = 'lightyellow'
-            text_color = 'orange'
-            text_message = "NEXT LEVEL"
-
-        # if play_music:  # Game.END (not implemented)
-        #     pg.mixer.music.load("audio/cinematic-dramatic-11120.mp3")
-        #     pg.mixer.music.play(-1)
-        #     text_music = "Music by AleXZavesa from Pixabay"
-        #     play_music = False
-
-        # black screen
-        screen.fill(fill_color)
-
-        # game over text (big font)
-        game_mode_text = game_over_font.render(text_message, True, text_color)
-        game_mode_rect = game_mode_text.get_rect(center=(screen_width / 2, screen_height / 2))
-        screen.blit(game_mode_text, game_mode_rect)
-
-        # restart text (small font)
-        game_restart_text = game_active_font.render(f"press SPACE to continue", True, text_color)
-        game_restart_rect = game_restart_text.get_rect(center=(screen_width / 2, (screen_height / 2) + 100))
-        screen.blit(game_restart_text, game_restart_rect)
-
-        # print music credit
-        text_screen = game_active_font.render(text_music, False, text_color)
-        screen.blit(text_screen, (1000, 750))
-
-        # restart enemy_01 rectangle list
-        enemy_group.empty()
-
-        # Get the state of the keyboard
-        keys = pg.key.get_pressed()
-
-        # press keyboard left
-        if keys[pg.K_SPACE]:
-
-            # restart hero and enemies position
-            hero.sprite.rect.x = 200
-            hero.sprite.rect.bottom = screen_height - ground_height
-            # enemy_02_rect.x = 1000
-
-            # restart jump parameters
-            hero.sprite.jump_velocity = 0
-            hero.sprite.jump_timer = 0
-            hero.sprite.jump_pixel = 0
-
-            # reset game score
-            game_score = 0
-
-            # restart background music
-            play_music = True
-
-            # restart game
-            if game_mode == Game.NEXT:
-                if game_day == Game.DAY_1:
-                    game_mode = Game.DAY_2
-                elif game_day == Game.DAY_2:
-                    game_mode = Game.DAY_3
+                if play_music:
+                    pg.mixer.music.load("audio/chill-abstract-intention-12099.mp3")
+                    pg.mixer.music.play(-1)  # -1 to play it continuosly
+                    text_music = "Music by Coma-Media from Pixabay"
+                    play_music = False
 
             elif game_mode == Game.WON:
-                game_mode = Game.DAY_1  # restart game
+                fill_color = 'lightyellow'
+                text_color = 'orange'
+                text_message = f"GAME {game_mode.name}"
 
-            else:  # default game start
-                game_mode = game_day  # continue from current day
+            elif game_mode == Game.OVER:
+                fill_color = 'black'
+                text_color = 'red'
+                text_message = f"GAME {game_mode.name}"
 
-            # set enemy spawn timer depending on the day
-            if game_mode == Game.DAY_3:
-                pg.time.set_timer(timer_enemy_01_spawn, 600)
-            elif game_mode == Game.DAY_2:
-                pg.time.set_timer(timer_enemy_01_spawn, 800)
-            else:  # default DAY_1
-                pg.time.set_timer(timer_enemy_01_spawn, 1000)
+                # if play_music:
+                #     pg.mixer.music.load("audio/76376__deleted_user_877451__game_over.wav")
+                #     pg.mixer.music.play()
+                #     text_music = "Sound by deleted_user_877451"
+                #     play_music = False
 
-    #####################################################################################
-    # game mode: GAME ACTIVE
-    #####################################################################################
-    elif game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3:
+            else:  # game_mode = Game.NEXT
+                fill_color = 'lightyellow'
+                text_color = 'orange'
+                text_message = "NEXT LEVEL"
 
-        # PLAY MUSIC  ###################################################################
+            # if play_music:  # Game.END (not implemented)
+            #     pg.mixer.music.load("audio/cinematic-dramatic-11120.mp3")
+            #     pg.mixer.music.play(-1)
+            #     text_music = "Music by AleXZavesa from Pixabay"
+            #     play_music = False
 
-        # play/stop background music
-        if play_music:
-            if game_mode == Game.DAY_1:
-                pg.mixer.music.load("audio/chill-ambient-11322.mp3")
-                pg.mixer.music.play(-1)
-                text_music = "Music by Coma-Media from Pixabay"
-                play_music = False
+            # black screen
+            screen.fill(fill_color)
 
-            elif game_mode == Game.DAY_2:
-                pg.mixer.music.load("audio/middle-east-127104.mp3")
-                pg.mixer.music.play(-1)
-                text_music = "Music by AlexiAction from Pixabay"
-                play_music = False
+            # game over text (big font)
+            game_mode_text = game_over_font.render(text_message, True, text_color)
+            game_mode_rect = game_mode_text.get_rect(center=(screen_width / 2, screen_height / 2))
+            screen.blit(game_mode_text, game_mode_rect)
 
-            elif game_mode == Game.DAY_3:
-                pg.mixer.music.load("audio/sinister-night-halloween-trap-hip-hop-music-121202.mp3")
-                pg.mixer.music.play(-1)
-                text_music = "Music by SoulProdMusic from Pixabay"
-                play_music = False
+            # restart text (small font)
+            game_restart_text = game_active_font.render(f"press SPACE to continue", True, text_color)
+            game_restart_rect = game_restart_text.get_rect(center=(screen_width / 2, (screen_height / 2) + 100))
+            screen.blit(game_restart_text, game_restart_rect)
 
-        # SURFACE AND COLLISIONS  #######################################################S
+            # print music credit
+            text_screen = game_active_font.render(text_music, False, text_color)
+            screen.blit(text_screen, (1000, 750))
 
-        # create horizon surface
-        horizon_surf = pg.image.load(f'graphics/horizont_{game_mode.name}.png').convert()
-        horizon_rect = horizon_surf.get_rect(topleft=(0, 0))
+            # restart enemy_01 rectangle list
+            enemy_group.empty()
 
-        # draw background
-        screen.blit(horizon_surf, (0, 0))
+            # Get the state of the keyboard
+            keys = pg.key.get_pressed()
 
-        # draw second hero using sprites
-        hero.draw(screen)
-        hero.update()
+            # press keyboard left
+            if keys[pg.K_SPACE]:
 
-        # draws class Enemy
-        enemy_group.draw(screen)
-        enemy_group.update()
+                # restart hero and enemies position
+                hero.sprite.rect.x = 200
+                hero.sprite.rect.bottom = screen_height - ground_height
+                # enemy_02_rect.x = 1000
 
-        # hero collision with enemy_group!
-        if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
-            text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
-            screen.blit(text_collision, (600, 50))
-            game_day = game_mode  # save game day
-            game_mode = Game.OVER  # GAME OVER!
-            play_music = True  # to change background music
+                # restart jump parameters
+                hero.sprite.jump_velocity = 0
+                hero.sprite.jump_timer = 0
+                hero.sprite.jump_pixel = 0
 
-        # GAME SCORE  ###################################################################
+                # reset game score
+                game_score = 0
 
-        # count game score
-        # if len(enemy_group) > 0:
-        for enemy in enemy_group.sprites():
-            if hero.sprite.rect.bottom < enemy.rect.top \
-                    and enemy.rect.x < hero.sprite.rect.x < enemy.rect.x + 50 \
-                    and not enemy.hero_dodge:
-                game_score += 1
-                enemy.hero_dodge = True  # to avoid more than one score increment
+                # restart background music
+                play_music = True
 
-        # win score selection
-        if game_score >= 20:
-            if game_mode == Game.DAY_3:
-                game_mode = Game.WON  # GAME END!
-            else:
-                game_day = game_mode  # save day for next level
-                game_mode = Game.NEXT
+                # restart game
+                if game_mode == Game.NEXT:
+                    if game_day == Game.DAY_1:
+                        game_mode = Game.DAY_2
+                    elif game_day == Game.DAY_2:
+                        game_mode = Game.DAY_3
 
-        # GRID LINES  ###################################################################
+                elif game_mode == Game.WON:
+                    game_mode = Game.DAY_1  # restart game
 
-        # Draw the horizontal lines of the grid
-        for y in range(0, screen_height, 50):
-            pg.draw.line(screen, 'Black', (0, y), (screen_width, y))
+                else:  # default game start
+                    game_mode = game_day  # continue from current day
 
-        # Draw the vertical lines of the grid
-        for x in range(0, screen_width, 50):
-            pg.draw.line(screen, 'Black', (x, 0), (x, screen_height))
+                # set enemy spawn timer depending on the day
+                if game_mode == Game.DAY_3:
+                    pg.time.set_timer(timer_enemy_01_spawn, 600)
+                elif game_mode == Game.DAY_2:
+                    pg.time.set_timer(timer_enemy_01_spawn, 800)
+                else:  # default DAY_1
+                    pg.time.set_timer(timer_enemy_01_spawn, 1000)
 
-        # TEXT MESSAGES #################################################################
+        #####################################################################################
+        # game mode: GAME ACTIVE
+        #####################################################################################
+        elif game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3:
 
-        # print hero action on screen
-        text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
-        screen.blit(text_screen, (10, 10))
+            # PLAY MUSIC  ###################################################################
 
-        # print jump force list on screen
-        text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
-        screen.blit(text_screen, (10, 50))
+            # play/stop background music
+            if play_music:
+                if game_mode == Game.DAY_1:
+                    pg.mixer.music.load("audio/chill-ambient-11322.mp3")
+                    pg.mixer.music.play(-1)
+                    text_music = "Music by Coma-Media from Pixabay"
+                    play_music = False
 
-        # print game score list on screen
-        text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
-        screen.blit(text_screen, (10, 90))
+                elif game_mode == Game.DAY_2:
+                    pg.mixer.music.load("audio/middle-east-127104.mp3")
+                    pg.mixer.music.play(-1)
+                    text_music = "Music by AlexiAction from Pixabay"
+                    play_music = False
 
-        # print enemy list on screen
-        text_screen = game_active_font.render(f'ENEMY group: {len(enemy_group.sprites())}', False, 'Black')
-        screen.blit(text_screen, (600, 10))
+                elif game_mode == Game.DAY_3:
+                    pg.mixer.music.load("audio/sinister-night-halloween-trap-hip-hop-music-121202.mp3")
+                    pg.mixer.music.play(-1)
+                    text_music = "Music by SoulProdMusic from Pixabay"
+                    play_music = False
 
-        # print game score on screen
-        text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
-        screen.blit(text_screen, (1200, 10))
+            # SURFACE AND COLLISIONS  #######################################################S
 
-        # print music credit
-        text_screen = game_active_font.render(text_music, False, 'Black')
-        screen.blit(text_screen, (1000, 750))
+            # create horizon surface
+            horizon_surf = pg.image.load(f'graphics/horizont_{game_mode.name}.png').convert()
+            horizon_rect = horizon_surf.get_rect(topleft=(0, 0))
 
-    # LOOP END ##########################################################################
+            # draw background
+            screen.blit(horizon_surf, (0, 0))
 
-    # # Show frame rate in title bar
-    # fps = game_clock.get_fps()
-    # pg.display.set_caption(f"My Game - FPS: {fps:.2f}")
+            # draw second hero using sprites
+            hero.draw(screen)
+            hero.update()
 
-    # update everything
-    pg.display.update()
-    game_clock.tick(60)  # ceiling limit of 60 fps
+            # draws class Enemy
+            enemy_group.draw(screen)
+            enemy_group.update()
+
+            # hero collision with enemy_group!
+            if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
+                text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
+                screen.blit(text_collision, (600, 50))
+                game_day = game_mode  # save game day
+                game_mode = Game.OVER  # GAME OVER!
+                play_music = True  # to change background music
+
+            # GAME SCORE  ###################################################################
+
+            # count game score
+            # if len(enemy_group) > 0:
+            for enemy in enemy_group.sprites():
+                if hero.sprite.rect.bottom < enemy.rect.top \
+                        and enemy.rect.x < hero.sprite.rect.x < enemy.rect.x + 50 \
+                        and not enemy.hero_dodge:
+                    game_score += 1
+                    enemy.hero_dodge = True  # to avoid more than one score increment
+
+            # win score selection
+            if game_score >= 20:
+                if game_mode == Game.DAY_3:
+                    game_mode = Game.WON  # GAME END!
+                else:
+                    game_day = game_mode  # save day for next level
+                    game_mode = Game.NEXT
+
+            # GRID LINES  ###################################################################
+
+            # Draw the horizontal lines of the grid
+            for y in range(0, screen_height, 50):
+                pg.draw.line(screen, 'Black', (0, y), (screen_width, y))
+
+            # Draw the vertical lines of the grid
+            for x in range(0, screen_width, 50):
+                pg.draw.line(screen, 'Black', (x, 0), (x, screen_height))
+
+            # TEXT MESSAGES #################################################################
+
+            # print hero action on screen
+            text_screen = game_active_font.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
+            screen.blit(text_screen, (10, 10))
+
+            # print jump force list on screen
+            text_screen = game_active_font.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
+            screen.blit(text_screen, (10, 50))
+
+            # print game score list on screen
+            text_screen = game_active_font.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
+            screen.blit(text_screen, (10, 90))
+
+            # print enemy list on screen
+            text_screen = game_active_font.render(f'ENEMY group: {len(enemy_group.sprites())}', False, 'Black')
+            screen.blit(text_screen, (600, 10))
+
+            # print game score on screen
+            text_screen = game_active_font.render(f'Score: {game_score}', False, 'Black')
+            screen.blit(text_screen, (1200, 10))
+
+            # print music credit
+            text_screen = game_active_font.render(text_music, False, 'Black')
+            screen.blit(text_screen, (1000, 750))
+
+        # LOOP END ##########################################################################
+
+        # # Show frame rate in title bar
+        # fps = game_clock.get_fps()
+        # pg.display.set_caption(f"My Game - FPS: {fps:.2f}")
+
+        # update everything
+        pg.display.update()
+        game_clock.tick(60)  # ceiling limit of 60 fps
+
+
+if __name__ == '__main__':
+    main()
