@@ -311,7 +311,7 @@ def main():
     pg.init()
 
     # set to True for game over / False for game active
-    game_mode = Game.DAY_1  # default Game.START
+    game_mode = Game.START  # default
     game_day = Game.DAY_1  # default
 
     # initialize game score
@@ -558,8 +558,8 @@ def main():
                 text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
                 screen.blit(text_collision, (600, 50))
                 game_day = game_mode  # save game day
-                # game_mode = Game.OVER  # GAME OVER!
-                # play_music = True  # to change background music
+                game_mode = Game.OVER  # GAME OVER!
+                play_music = True  # to change background music
 
             # GAME SCORE  ###################################################################
 
@@ -618,7 +618,7 @@ def main():
 
             # # print execution time
             frame_time = pg.time.get_ticks() - start_time  # measure the time elapsed since the last frame
-            text_screen = game_active_font.render(f'Cycle time: {pg.time.get_ticks()} ms', False, 'Black')
+            text_screen = game_active_font.render(f'Total time: {pg.time.get_ticks()} ms', False, 'Black')
             screen.blit(text_screen, (1200, 50))
 
             # PERFORMANCE ###################################################################
