@@ -17,14 +17,15 @@
 
     Contact email: alejandronieto40@gmail.com
 """
+import sys
 
 import pygame as pg
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import time
+# import time  # using better the pygame time
 import csv
-from sys import exit
+from sys import exit, version
 from random import randint, choice  # choice will be used to random spawn different types of enemies
 from enum import Enum
 
@@ -34,6 +35,8 @@ screen_width = 1600
 screen_height = 800
 screen = pg.display.set_mode((screen_width, screen_height))  # canvas for everything!
 cycle_time = []  # in seconds
+test_time_limit = 50000  # in ms
+test_spawn_time = 1000  # for performance test
 
 
 class Hero(pg.sprite.Sprite):
@@ -308,7 +311,7 @@ def main():
     pg.init()
 
     # set to True for game over / False for game active
-    game_mode = Game.START
+    game_mode = Game.DAY_1  # default Game.START
     game_day = Game.DAY_1  # default
 
     # initialize game score
@@ -343,7 +346,7 @@ def main():
 
     # timers enemy_01 spawn
     timer_enemy_01_spawn = pg.USEREVENT + 2  # +2 is used to avoid conflicts with pygame user events
-    pg.time.set_timer(timer_enemy_01_spawn, 1000)  # tigger event in x ms (default)
+    pg.time.set_timer(timer_enemy_01_spawn, test_spawn_time)  # tigger event in x ms (default)
 
     # timers enemy_01 animation
     timer_enemy_01_animation = pg.USEREVENT + 3  # +3 is used to avoid conflicts with pygame user events
@@ -351,8 +354,11 @@ def main():
 
     # game loop
     while True:
-        # start counting execution time
-        start_time = time.time()
+        # # start counting execution time
+        # start_time = time.time()
+
+        # start measuring time
+        start_time = pg.time.get_ticks()
 
         #####################################################################################
         # game mode: EVENTS
@@ -364,11 +370,6 @@ def main():
             # EVENT: QUIT BUTTON
             if event.type == pg.QUIT:  # QUIT = x button of the window
                 pg.quit()
-
-                # # save performance
-                # my_array = np.array(cycle_time)
-                # pd.DataFrame(my_array).to_csv('performance/performance.csv')
-
                 exit() # to close the while: True loop
 
             # TIMER EVENT: HERO STANDING ANIMATION
@@ -506,7 +507,7 @@ def main():
                 elif game_mode == Game.DAY_2:
                     pg.time.set_timer(timer_enemy_01_spawn, 800)
                 else:  # default DAY_1
-                    pg.time.set_timer(timer_enemy_01_spawn, 1)
+                    pg.time.set_timer(timer_enemy_01_spawn, 1000)
 
         #####################################################################################
         # game mode: GAME ACTIVE
@@ -535,7 +536,7 @@ def main():
                     text_music = "Music by SoulProdMusic from Pixabay"
                     play_music = False
 
-            # SURFACE AND COLLISIONS  #######################################################S
+            # SURFACE AND COLLISIONS  #######################################################
 
             # create horizon surface
             horizon_surf = pg.image.load(f'graphics/horizont_{game_mode.name}.png').convert()
@@ -615,13 +616,25 @@ def main():
             text_screen = game_active_font.render(text_music, False, 'Black')
             screen.blit(text_screen, (1000, 750))
 
-            # print execution time
-            end_time = time.time()
-            total_time = end_time - start_time
-            cycle_time.append(total_time)
-
-            text_screen = game_active_font.render(f'Cycle time: {total_time:.4f} s', False, 'Black')
+            # # print execution time
+            frame_time = pg.time.get_ticks() - start_time  # measure the time elapsed since the last frame
+            text_screen = game_active_font.render(f'Cycle time: {pg.time.get_ticks()} ms', False, 'Black')
             screen.blit(text_screen, (1200, 50))
+
+            # PERFORMANCE ###################################################################
+
+            # # only for performance test
+            # cycle_time.append(frame_time)
+            # if pg.time.get_ticks() > test_time_limit:
+            #     # save performance values to csv
+            #     my_array = np.array(cycle_time)
+            #     col_names = ['cycle_time']
+            #     pd.DataFrame(my_array, columns=col_names).to_csv(f'performance/'
+            #                                                      f'python_{sys.version}'
+            #                                                      f'_spawn_time_{test_spawn_time}_ms'
+            #                                                      f'_test_time_{test_time_limit}_ms.csv')
+            #     pg.quit()
+            #     exit()
 
         # LOOP END ##########################################################################
 
@@ -635,24 +648,32 @@ def main():
 
 
 def performance():
-    pg.quit()
-    df_311 = pd.read_csv('performance/performance_3-11.csv')
-    df_310 = pd.read_csv('performance/performance_3-10.csv')
-    # merged_df = pd.merge(df_310, df_311, on='index')
+    pg.quit()  # use to avoid error by pygame screen open
+
+    # read csv files
+    df_310 = pd.read_csv('performance/'
+                         'python_3.10.6 (main, Mar 10 2023, 10:55:28) [GCC 11.3.0]_spawn_time_1_ms_test_time_50000.csv')
+    df_311 = pd.read_csv('performance/'
+                         'python_3.11.3 (main, Apr  5 2023, 14:14:37) [GCC 11.3.0]_spawn_time_1_ms_test_time_50000.csv')
 
     # plot the two dataframes on the same figure
     fig, ax = plt.subplots()
-    df_311.plot(x='index', y='cycle_time', ax=ax, label='python_3.11')
-    df_310.plot(x='index', y='cycle_time', ax=ax, label='python_3.10')
+    df_310.plot(y='cycle_time', ax=ax, label='python_3.10')
+    df_311.plot(y='cycle_time', ax=ax, label='python_3.11')
 
     # set the plot title and labels
-    ax.set_title('timer_enemy_01_spawn = 1 ms | enemy_group.sprites = 10000 | game_clock.tick(60)')
+    ax.set_title(f'timer_enemy_01_spawn = {test_spawn_time} ms | pg.time.get_ticks() > {test_time_limit} | '
+                 f'game_clock.tick(60)')
     ax.set_xlabel('cycle number')
-    ax.set_ylabel('cycle time (seconds)')
+    ax.set_ylabel('cycle time (ms)')
+
+    # # set the axis limits
+    # ax.set_xlim([0, 1000])
+    # ax.set_ylim([0, 25])
 
     plt.show()
 
 
 if __name__ == '__main__':
-    # main()
-    performance()
+    main()
+    # performance()
