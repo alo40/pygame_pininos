@@ -18,8 +18,9 @@
     Contact email: alejandronieto40@gmail.com
 """
 
-
 import pygame as pg
+import time
+import matplotlib.pyplot as plt
 from sys import exit
 from random import randint, choice  # choice will be used to random spawn different types of enemies
 from enum import Enum
@@ -29,6 +30,7 @@ ground_height = 200
 screen_width = 1600
 screen_height = 800
 screen = pg.display.set_mode((screen_width, screen_height))  # canvas for everything!
+cycle_time = []  # in seconds
 
 
 class Hero(pg.sprite.Sprite):
@@ -333,12 +335,12 @@ def main():
     enemy_group = pg.sprite.Group()
 
     # timers hero standing animation
-    timer_hero_standing_animation = pg.USEREVENT + 1  # +2 is used to avoid conflicts with pygame user events
+    timer_hero_standing_animation = pg.USEREVENT + 1  # +1 is used to avoid conflicts with pygame user events
     pg.time.set_timer(timer_hero_standing_animation, 200)  # tigger event in x ms
 
     # timers enemy_01 spawn
-    timer_enemy_01_spawn = pg.USEREVENT + 2  # +1 is used to avoid conflicts with pygame user events
-    pg.time.set_timer(timer_enemy_01_spawn, 1000)  # tigger event in x ms
+    timer_enemy_01_spawn = pg.USEREVENT + 2  # +2 is used to avoid conflicts with pygame user events
+    pg.time.set_timer(timer_enemy_01_spawn, 1000)  # tigger event in x ms (default)
 
     # timers enemy_01 animation
     timer_enemy_01_animation = pg.USEREVENT + 3  # +3 is used to avoid conflicts with pygame user events
@@ -346,6 +348,8 @@ def main():
 
     # game loop
     while True:
+        # start counting execution time
+        start_time = time.time()
 
         #####################################################################################
         # game mode: EVENTS
@@ -357,6 +361,8 @@ def main():
             # EVENT: QUIT BUTTON
             if event.type == pg.QUIT:  # QUIT = x button of the window
                 pg.quit()
+                plt.plot(cycle_time)
+                plt.show()
                 exit() # to close the while: True loop
 
             # TIMER EVENT: HERO STANDING ANIMATION
@@ -494,7 +500,7 @@ def main():
                 elif game_mode == Game.DAY_2:
                     pg.time.set_timer(timer_enemy_01_spawn, 800)
                 else:  # default DAY_1
-                    pg.time.set_timer(timer_enemy_01_spawn, 1000)
+                    pg.time.set_timer(timer_enemy_01_spawn, 100)
 
         #####################################################################################
         # game mode: GAME ACTIVE
@@ -545,8 +551,8 @@ def main():
                 text_collision = game_active_font.render('Enemy collision: GAME OVER!', False, 'Red')
                 screen.blit(text_collision, (600, 50))
                 game_day = game_mode  # save game day
-                game_mode = Game.OVER  # GAME OVER!
-                play_music = True  # to change background music
+                # game_mode = Game.OVER  # GAME OVER!
+                # play_music = True  # to change background music
 
             # GAME SCORE  ###################################################################
 
@@ -602,6 +608,14 @@ def main():
             # print music credit
             text_screen = game_active_font.render(text_music, False, 'Black')
             screen.blit(text_screen, (1000, 750))
+
+            # print execution time
+            end_time = time.time()
+            total_time = end_time - start_time
+            cycle_time.append(total_time)
+
+            text_screen = game_active_font.render(f'Cycle time: {total_time:.4f} s', False, 'Black')
+            screen.blit(text_screen, (1200, 50))
 
         # LOOP END ##########################################################################
 
