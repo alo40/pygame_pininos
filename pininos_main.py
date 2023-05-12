@@ -19,8 +19,11 @@
 """
 
 import pygame as pg
-import time
+import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+import time
+import csv
 from sys import exit
 from random import randint, choice  # choice will be used to random spawn different types of enemies
 from enum import Enum
@@ -361,8 +364,11 @@ def main():
             # EVENT: QUIT BUTTON
             if event.type == pg.QUIT:  # QUIT = x button of the window
                 pg.quit()
-                plt.plot(cycle_time)
-                plt.show()
+
+                # # save performance
+                # my_array = np.array(cycle_time)
+                # pd.DataFrame(my_array).to_csv('performance/performance.csv')
+
                 exit() # to close the while: True loop
 
             # TIMER EVENT: HERO STANDING ANIMATION
@@ -500,7 +506,7 @@ def main():
                 elif game_mode == Game.DAY_2:
                     pg.time.set_timer(timer_enemy_01_spawn, 800)
                 else:  # default DAY_1
-                    pg.time.set_timer(timer_enemy_01_spawn, 100)
+                    pg.time.set_timer(timer_enemy_01_spawn, 1)
 
         #####################################################################################
         # game mode: GAME ACTIVE
@@ -628,5 +634,25 @@ def main():
         game_clock.tick(60)  # ceiling limit of 60 fps
 
 
+def performance():
+    pg.quit()
+    df_311 = pd.read_csv('performance/performance_3-11.csv')
+    df_310 = pd.read_csv('performance/performance_3-10.csv')
+    # merged_df = pd.merge(df_310, df_311, on='index')
+
+    # plot the two dataframes on the same figure
+    fig, ax = plt.subplots()
+    df_311.plot(x='index', y='cycle_time', ax=ax, label='python_3.11')
+    df_310.plot(x='index', y='cycle_time', ax=ax, label='python_3.10')
+
+    # set the plot title and labels
+    ax.set_title('timer_enemy_01_spawn = 1 ms | enemy_group.sprites = 10000 | game_clock.tick(60)')
+    ax.set_xlabel('cycle number')
+    ax.set_ylabel('cycle time (seconds)')
+
+    plt.show()
+
+
 if __name__ == '__main__':
-    main()
+    # main()
+    performance()
