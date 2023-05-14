@@ -400,12 +400,16 @@ def main():
                         enemy.animation()
 
         #####################################################################################
-        # game mode: GAME START/OVER/WON/NEXT
+        # game mode: GAME WON
+        #####################################################################################
+
+        #####################################################################################
+        # game mode: GAME START/OVER/NEXT
         #####################################################################################
         if game_mode == Game.START \
-                or game_mode == Game.WON \
-                or game_mode == Game.OVER \
-                or game_mode == Game.NEXT:
+        or game_mode == Game.WON \
+        or game_mode == Game.OVER \
+        or game_mode == Game.NEXT:
 
             # colors
             if game_mode == Game.START:
@@ -424,27 +428,27 @@ def main():
                 text_color = 'orange'
                 text_message = f"GAME {game_mode.name}"
 
+                if play_music:
+                    pg.mixer.music.load("audio/cinematic-dramatic-11120.mp3")
+                    pg.mixer.music.play(-1)
+                    text_music = "Music by AleXZavesa from Pixabay"
+                    play_music = False
+
             elif game_mode == Game.OVER:
                 fill_color = 'black'
                 text_color = 'red'
                 text_message = f"GAME {game_mode.name}"
 
-                # if play_music:
-                #     pg.mixer.music.load("audio/76376__deleted_user_877451__game_over.wav")
-                #     pg.mixer.music.play()
-                #     text_music = "Sound by deleted_user_877451"
-                #     play_music = False
+                if play_music:
+                    pg.mixer.music.load("audio/76376__deleted_user_877451__game_over.wav")
+                    pg.mixer.music.play()
+                    text_music = "Sound by deleted_user_877451"
+                    play_music = False
 
             else:  # game_mode = Game.NEXT
                 fill_color = 'lightyellow'
                 text_color = 'orange'
                 text_message = "NEXT LEVEL"
-
-            # if play_music:  # Game.END (not implemented)
-            #     pg.mixer.music.load("audio/cinematic-dramatic-11120.mp3")
-            #     pg.mixer.music.play(-1)
-            #     text_music = "Music by AleXZavesa from Pixabay"
-            #     play_music = False
 
             # black screen
             screen.fill(fill_color)
@@ -494,12 +498,12 @@ def main():
                         game_mode = Game.DAY_2
                     elif game_day == Game.DAY_2:
                         game_mode = Game.DAY_3
-
-                elif game_mode == Game.WON:
-                    game_mode = Game.DAY_1  # restart game
-
                 else:  # default game start
                     game_mode = game_day  # continue from current day
+
+                # restart game
+                if game_mode == Game.WON:
+                    game_mode = Game.START
 
                 # set enemy spawn timer depending on the day
                 if game_mode == Game.DAY_3:
@@ -573,8 +577,10 @@ def main():
                     enemy.hero_dodge = True  # to avoid more than one score increment
 
             # win score selection
-            if game_score >= 20:
+            if game_score >= 2:
                 if game_mode == Game.DAY_3:
+                    play_music = True  # to change background music
+                    game_day = Game.DAY_1
                     game_mode = Game.WON  # GAME END!
                 else:
                     game_day = game_mode  # save day for next level
