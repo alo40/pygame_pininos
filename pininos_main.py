@@ -403,11 +403,47 @@ def main():
         # game mode: GAME WON
         #####################################################################################
 
+        if game_mode == Game.WON:
+            # colors
+            fill_color = 'lightyellow'
+            text_color = 'orange'
+            text_message = f"GAME {game_mode.name}"
+
+            if play_music:
+                pg.mixer.music.load("audio/cinematic-dramatic-11120.mp3")
+                pg.mixer.music.play(-1)
+                text_music = "Music by AleXZavesa from Pixabay"
+                play_music = False
+
+            # black screen
+            screen.fill(fill_color)
+
+            # game over text (big font)
+            game_mode_text = game_over_font.render(text_message, True, text_color)
+            game_mode_rect = game_mode_text.get_rect(center=(screen_width / 2, screen_height / 2))
+            screen.blit(game_mode_text, game_mode_rect)
+
+            # restart text (small font)
+            game_restart_text = game_active_font.render(f"press ENTER to restart", True, text_color)
+            game_restart_rect = game_restart_text.get_rect(center=(screen_width / 2, (screen_height / 2) + 100))
+            screen.blit(game_restart_text, game_restart_rect)
+
+            # print music credit
+            text_screen = game_active_font.render(text_music, False, text_color)
+            screen.blit(text_screen, (1000, 750))
+
+            # Get the state of the keyboard
+            keys = pg.key.get_pressed()
+
+            # press keyboard left
+            if keys[pg.K_RETURN]:
+                play_music = True  # restart music
+                game_mode = Game.START  # restart game
+
         #####################################################################################
         # game mode: GAME START/OVER/NEXT
         #####################################################################################
         if game_mode == Game.START \
-        or game_mode == Game.WON \
         or game_mode == Game.OVER \
         or game_mode == Game.NEXT:
 
@@ -421,17 +457,6 @@ def main():
                     pg.mixer.music.load("audio/chill-abstract-intention-12099.mp3")
                     pg.mixer.music.play(-1)  # -1 to play it continuosly
                     text_music = "Music by Coma-Media from Pixabay"
-                    play_music = False
-
-            elif game_mode == Game.WON:
-                fill_color = 'lightyellow'
-                text_color = 'orange'
-                text_message = f"GAME {game_mode.name}"
-
-                if play_music:
-                    pg.mixer.music.load("audio/cinematic-dramatic-11120.mp3")
-                    pg.mixer.music.play(-1)
-                    text_music = "Music by AleXZavesa from Pixabay"
                     play_music = False
 
             elif game_mode == Game.OVER:
@@ -498,12 +523,8 @@ def main():
                         game_mode = Game.DAY_2
                     elif game_day == Game.DAY_2:
                         game_mode = Game.DAY_3
-                else:  # default game start
+                else:
                     game_mode = game_day  # continue from current day
-
-                # restart game
-                if game_mode == Game.WON:
-                    game_mode = Game.START
 
                 # set enemy spawn timer depending on the day
                 if game_mode == Game.DAY_3:
@@ -577,7 +598,7 @@ def main():
                     enemy.hero_dodge = True  # to avoid more than one score increment
 
             # win score selection
-            if game_score >= 2:
+            if game_score >= 20:
                 if game_mode == Game.DAY_3:
                     play_music = True  # to change background music
                     game_day = Game.DAY_1
