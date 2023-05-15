@@ -108,7 +108,7 @@ class Hero(pg.sprite.Sprite):
         self.mask = pg.mask.from_surface(self.image)
 
         # only for testing
-        self.draw_boundaries()
+        # self.draw_boundaries()
         # self.draw_mask_outline()
 
     def standing(self):
@@ -460,8 +460,8 @@ def main():
         # game mode: GAME START/OVER/NEXT
         #####################################################################################
         if game_mode == Game.START \
-        or game_mode == Game.OVER \
-        or game_mode == Game.NEXT:
+                or game_mode == Game.OVER \
+                or game_mode == Game.NEXT:
 
             # colors
             if game_mode == Game.START:
@@ -589,6 +589,10 @@ def main():
             hero.draw(screen)
             hero.update()
 
+            mask = hero.sprite.mask
+            mask_surface = mask.to_surface()
+            screen.blit(mask_surface, (0, 600))
+
             # draws class Enemy
             enemy_group.draw(screen)
             enemy_group.update()
@@ -609,8 +613,9 @@ def main():
             # if len(enemy_group) > 0:
             for enemy in enemy_group.sprites():
                 if hero.sprite.rect.bottom < enemy.rect.top \
-                and enemy.rect.x < hero.sprite.rect.x < enemy.rect.x + 50 \
-                and not enemy.hero_dodge:
+                    and enemy.rect.x < hero.sprite.rect.x < enemy.rect.x + 50 \
+                        and not enemy.hero_dodge:
+
                     game_score += 1
                     enemy.hero_dodge = True  # to avoid more than one score increment
 
