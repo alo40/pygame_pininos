@@ -29,11 +29,13 @@ from sys import exit, version
 from random import randint, choice  # choice will be used to random spawn different types of enemies
 from enum import Enum
 
-# GLOBAL variables
+# GLOBAL game variables
 ground_height = 200
 screen_width = 1600
 screen_height = 800
 screen = pg.display.set_mode((screen_width, screen_height))  # canvas for everything!
+
+# GLOBAL performance variables
 cycle_time = []  # in seconds
 test_time_limit = 50000  # in ms
 test_spawn_time = 1000  # for performance test
@@ -44,7 +46,7 @@ class Hero(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        # parameters
+        # move/jump parameters
         self.move_speed = 10
         self.jump_force = 0
         self.jump_force_max = 100
@@ -53,6 +55,9 @@ class Hero(pg.sprite.Sprite):
         self.jump_pixel = 0
         self.gravity = 10
         self.action = Action.ON_GROUND
+
+        # life parameters
+        self.life_counter = 3
 
         # hero model
         model = 'soldier'
@@ -106,6 +111,9 @@ class Hero(pg.sprite.Sprite):
 
         # update mask
         self.mask = pg.mask.from_surface(self.image)
+
+        # update life
+        self.life_management()
 
         # only for testing
         # self.draw_boundaries()
@@ -195,16 +203,6 @@ class Hero(pg.sprite.Sprite):
         rect_width = self.rect.width
         rect_height = self.rect.height
         pg.draw.rect(screen, 'red', pg.Rect(rect_x, rect_y, rect_width, rect_height), 4)
-
-    # def draw_mask_outline(self):
-    #     olist = self.mask.outline()
-    #     mask_surface = pg.Surface((100, 200), pg.SRCALPHA)
-    #     pg.draw.lines(mask_surface, (200, 150, 150), True, olist)
-    #     # mask = pg.mask.from_surface(self.image)
-    #
-    #     # mask_surface.fill((0, 0, 0, 0))
-    #     # pg.draw.rect(mask_surface, pg.Color('green'), mask.re)
-    #     # mask_surface.blit(self.mask, self.o)
 
     def resize_rect(self):
 
@@ -304,6 +302,23 @@ class Enemy(pg.sprite.Sprite):
             self.kill()
 
 
+class Heart(pg.sprite.Sprite):
+
+    def __init__(self):
+        super().__init__()
+
+        # heart frames, image and rect
+        heart_full = pg.image.load('graphics/soldier_heart1.png')
+        heart_void = pg.image.load('graphics/soldier_heart2.png')
+        self.heart_frames = [heart_void, heart_full]
+        self.heart_index = 0  # 0: void, 1: full
+        self.heart_image = self.heart_frames[self.heart_index]
+        self.heart_rect = self.heart_image.get_rect(midbottom=(200, screen_height - ground_height))
+
+    def life_management(self):
+        pass
+
+
 class Action(Enum):
     ON_GROUND = 1
     JUMPING = 2
@@ -350,8 +365,9 @@ def main():
     hero = pg.sprite.GroupSingle()
     hero.add(Hero())
 
-    # hero action init
-    hero_action = Action.ON_GROUND
+    # declare heart group (hero life)
+    heart_group = pg.sprite.Group()
+    heart_group.add(Heart())
 
     # declare enemy group
     enemy_group = pg.sprite.Group()
@@ -379,7 +395,6 @@ def main():
         #####################################################################################
         # game mode: EVENTS
         #####################################################################################
-
         # loop through events
         for event in pg.event.get():
 
@@ -418,7 +433,6 @@ def main():
         #####################################################################################
         # game mode: GAME WON
         #####################################################################################
-
         if game_mode == Game.WON:
             # colors
             fill_color = 'lightyellow'
@@ -459,9 +473,7 @@ def main():
         #####################################################################################
         # game mode: GAME START/OVER/NEXT
         #####################################################################################
-        if game_mode == Game.START \
-                or game_mode == Game.OVER \
-                or game_mode == Game.NEXT:
+        if game_mode == Game.START or game_mode == Game.OVER or game_mode == Game.NEXT:
 
             # colors
             if game_mode == Game.START:
@@ -585,13 +597,14 @@ def main():
             # draw background
             screen.blit(horizon_surf, (0, 0))
 
-            # draw second hero using sprites
+            # draw hero using sprites
             hero.draw(screen)
             hero.update()
 
-            mask = hero.sprite.mask
-            mask_surface = mask.to_surface()
-            screen.blit(mask_surface, (0, 600))
+            # # hero mask image (only for testing)
+            # mask = hero.sprite.mask
+            # mask_surface = mask.to_surface()
+            # screen.blit(mask_surface, (0, 600))
 
             # draws class Enemy
             enemy_group.draw(screen)
