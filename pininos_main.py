@@ -17,17 +17,20 @@
 
     Contact email: alejandronieto40@gmail.com
 """
-import sys
 
+# used for game
 import pygame as pg
 import pandas as pd
-# import numpy as np
 import matplotlib.pyplot as plt
-# import time  # using better the pygame time
-import csv
 from sys import exit, version
 from random import randint, choice  # choice will be used to random spawn different types of enemies
 from enum import Enum
+
+# # used for performance (comment if not used)
+# import sys
+# import time  # using better the pygame time
+# import csv
+# import numpy as np
 
 # GLOBAL game variables
 ground_height = 200
@@ -57,7 +60,7 @@ class Hero(pg.sprite.Sprite):
         self.action = Action.ON_GROUND
 
         # life parameters
-        self.life_counter = 3
+        self.heart_counter = 3
 
         # hero model
         model = 'soldier'
@@ -111,9 +114,6 @@ class Hero(pg.sprite.Sprite):
 
         # update mask
         self.mask = pg.mask.from_surface(self.image)
-
-        # update life
-        self.life_management()
 
         # only for testing
         # self.draw_boundaries()
@@ -308,12 +308,18 @@ class Heart(pg.sprite.Sprite):
         super().__init__()
 
         # heart frames, image and rect
-        heart_full = pg.image.load('graphics/soldier_heart1.png')
-        heart_void = pg.image.load('graphics/soldier_heart2.png')
-        self.heart_frames = [heart_void, heart_full]
-        self.heart_index = 0  # 0: void, 1: full
-        self.heart_image = self.heart_frames[self.heart_index]
-        self.heart_rect = self.heart_image.get_rect(midbottom=(200, screen_height - ground_height))
+        frame1 = pg.image.load('graphics/soldier_heart1.png')
+        frame2 = pg.image.load('graphics/soldier_heart2.png')
+        self.frames = [frame1, frame2]
+        self.index = 0  # 0: void, 1: full
+        self.image = self.frames[self.index]
+        self.rect = self.image.get_rect(midbottom=(100, 750))
+
+    def update(self):
+
+        # update life
+        self.life_management()
+
 
     def life_management(self):
         pass
@@ -367,6 +373,7 @@ def main():
 
     # declare heart group (hero life)
     heart_group = pg.sprite.Group()
+    # for heart in hero.sprite.heart_counter:  # not working
     heart_group.add(Heart())
 
     # declare enemy group
@@ -386,9 +393,6 @@ def main():
 
     # game loop
     while True:
-        # # start counting execution time
-        # start_time = time.time()
-
         # start measuring time
         start_time = pg.time.get_ticks()
 
@@ -606,7 +610,10 @@ def main():
             # mask_surface = mask.to_surface()
             # screen.blit(mask_surface, (0, 600))
 
-            # draws class Enemy
+            # draw heart (hero life)
+            heart_group.draw(screen)
+
+            # draw enemy group
             enemy_group.draw(screen)
             enemy_group.update()
 
