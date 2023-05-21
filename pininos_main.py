@@ -304,13 +304,10 @@ class Enemy(pg.sprite.Sprite):
             frame8 = pg.image.load('graphics/evil_eye_2nd_type_big8.png').convert_alpha()
             frame9 = pg.image.load('graphics/evil_eye_2nd_type_big9.png').convert_alpha()
             frame10 = pg.image.load('graphics/evil_eye_2nd_type_big10.png').convert_alpha()
-            frame11 = frame1
-
 
             # concatenate frames
-            # self.frames = [frame1, frame2, frame3, frame4, frame5, frame7, frame8, frame9]
             self.frames = [frame1, frame2, frame3, frame4, frame5, frame6, frame7, frame8, frame9, frame10]
-            self.frame_index = 0
+            self.frame_index = randint(0, len(self.frames) - 1)
 
         else:  # other type of enemy can be used here
             pass
@@ -473,7 +470,6 @@ def main():
                     and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3):
 
                 # add new element to enemy group
-                # enemy_group.add(Enemy('enemy_01', game_mode))
                 enemy_group.add(Enemy(choice(ENEMY_TYPE_LIST), game_mode))
 
             # TIMER EVENT: ENEMY_01 ANIMATION
