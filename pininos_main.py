@@ -31,13 +31,16 @@ from enum import Enum
 # import csv
 # import numpy as np
 
-# GLOBAL game variables
+# GLOBAL screen parameters
 ground_height = 200
 screen_width = 1600
 screen_height = 800
 screen = pg.display.set_mode((screen_width, screen_height))  # canvas for everything!
 
-# GLOBAL performance variables
+# GLOBAL hero parameters
+HERO_LIFE = 3
+
+# GLOBAL performance parameters
 cycle_time = []  # in seconds
 test_time_limit = 50000  # in ms
 test_spawn_time = 1000  # for performance test
@@ -59,7 +62,7 @@ class Hero(pg.sprite.Sprite):
         self.action = Action.ON_GROUND
 
         # life parameters
-        self.heart_counter = 3
+        self.heart_counter = HERO_LIFE
 
         # hero model
         model = 'soldier'
@@ -318,7 +321,10 @@ class Heart(pg.sprite.Sprite):
         pass
 
     def empty_heart(self):
-        pass
+        self.image = self.frames[-1]
+
+    def full_heart(self):
+        self.image = self.frames[0]
 
 
 class Action(Enum):
@@ -373,7 +379,7 @@ def main():
 
     # declare heart group (hero life)
     heart_group = pg.sprite.Group()
-    for heart in range(hero.sprite.heart_counter):
+    for heart in range(HERO_LIFE):
         heart_group.add(Heart(heart))
 
     # declare enemy group
@@ -524,6 +530,11 @@ def main():
             text_screen = game_font_small.render(text_music, False, text_color)
             screen.blit(text_screen, (1000, 750))
 
+            # restart hero life
+            hero.sprite.heart_counter = HERO_LIFE
+            for heart in range(HERO_LIFE):
+                heart_group.sprites()[heart].full_heart()
+
             # restart enemy_01 rectangle list
             enemy_group.empty()
 
@@ -593,7 +604,7 @@ def main():
                     text_music = "Music by SoulProdMusic from Pixabay"
                     play_music = False
 
-            # SURFACE AND COLLISIONS  #######################################################
+            # DRAW SURFACES #################################################################
 
             # create horizon surface
             horizon_surf = pg.image.load(f'graphics/horizont_{game_mode.name}.png').convert()
@@ -617,6 +628,8 @@ def main():
             enemy_group.draw(screen)
             enemy_group.update()
 
+            # COLLISIONS  ###################################################################
+
             current_time = pg.time.get_ticks()
             # check cooldown time
             if current_time - last_collision_time > cooldown_time:
@@ -627,11 +640,10 @@ def main():
 
                         # reduce hero life
                         hero.sprite.heart_counter -= 1
-                        if hero.sprite.heart_counter > 0:
-                            pass
-                        else:
+                        heart_group.sprites()[hero.sprite.heart_counter].empty_heart()
+                        if hero.sprite.heart_counter == 0:
                             game_day = game_mode  # save game day
-                            # game_mode = Game.OVER  # GAME OVER!
+                            game_mode = Game.OVER  # GAME OVER!
                             play_music = True  # to change background music
 
                         # save collision time (for cooldown time)
@@ -640,7 +652,6 @@ def main():
                         # print collision text (only for testing)
                         text_collision = game_font_small.render('ENEMY COLLISION!', False, 'Red')
                         screen.blit(text_collision, (600, 90))
-
 
             # GAME SCORE  ###################################################################
 
