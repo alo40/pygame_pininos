@@ -56,7 +56,7 @@ HERO_X_START_POS = 200  # default 200
 # GLOBAL enemy parameters
 # ENEMY_TYPE_LIST = ['enemy_01', 'enemy_02']
 ENEMY_TYPE_LIST = ['enemy_02']
-ENEMY_ANIMATION_TIME = 200  # default 200 (in ms)
+ENEMY_ANIMATION_TIME = 400  # default 200 (in ms)
 
 ENEMY_SPAWN_TIME_DAY_1 = 1000  # default 1000
 ENEMY_MOVE_SPEED_DAY_1 = 8  # default 8
@@ -326,6 +326,9 @@ class Enemy(pg.sprite.Sprite):
         self.movement()
         self.garbage()
 
+        # update mask
+        self.mask = pg.mask.from_surface(self.image)
+
     def movement(self):
 
         self.rect.x -= self.move_speed
@@ -343,7 +346,7 @@ class Enemy(pg.sprite.Sprite):
     def garbage(self):
 
         # destroy enemy sprite
-        if self.rect.x < -100:
+        if self.rect.x < -500:
             self.kill()
 
 
