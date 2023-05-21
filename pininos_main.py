@@ -21,13 +21,12 @@
 # used for game
 import pygame as pg
 import pandas as pd
-import matplotlib.pyplot as plt
 from sys import exit, version
 from random import randint, choice  # choice will be used to random spawn different types of enemies
 from enum import Enum
 
 # # used for performance (comment if not used)
-# import sys
+# import matplotlib.pyplot as plt
 # import time  # using better the pygame time
 # import csv
 # import numpy as np
@@ -304,24 +303,21 @@ class Enemy(pg.sprite.Sprite):
 
 class Heart(pg.sprite.Sprite):
 
-    def __init__(self):
+    def __init__(self, heart_counter):
         super().__init__()
 
         # heart frames, image and rect
         frame1 = pg.image.load('graphics/soldier_heart1.png')
-        frame2 = pg.image.load('graphics/soldier_heart2.png')
+        frame2 = pg.image.load('graphics/soldier_heart7.png')
         self.frames = [frame1, frame2]
-        self.index = 0  # 0: void, 1: full
-        self.image = self.frames[self.index]
-        self.rect = self.image.get_rect(midbottom=(100, 750))
+        self.frame_index = 0  # 0: void, 1: full
+        self.image = self.frames[self.frame_index]
+        self.rect = self.image.get_rect(midbottom=(100 + 100 * heart_counter, 750))
 
     def update(self):
+        pass
 
-        # update life
-        self.life_management()
-
-
-    def life_management(self):
+    def empty_heart(self):
         pass
 
 
@@ -364,8 +360,12 @@ def main():
     # create clock object to control the frame rates
     game_clock = pg.time.Clock()
 
+    # initialize last collision time
+    cooldown_time = 1000  # in milliseconds
+    last_collision_time = pg.time.get_ticks() - cooldown_time
+
     # for background music
-    play_music = True
+    play_music = True  # default True
 
     # declare hero group and hero
     hero = pg.sprite.GroupSingle()
@@ -373,8 +373,8 @@ def main():
 
     # declare heart group (hero life)
     heart_group = pg.sprite.Group()
-    # for heart in hero.sprite.heart_counter:  # not working
-    heart_group.add(Heart())
+    for heart in range(hero.sprite.heart_counter):
+        heart_group.add(Heart(heart))
 
     # declare enemy group
     enemy_group = pg.sprite.Group()
@@ -617,15 +617,30 @@ def main():
             enemy_group.draw(screen)
             enemy_group.update()
 
-            # hero collision with enemy_group!
-            if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
-                # for enemy in enemy_group:
-                if pg.sprite.spritecollide(hero.sprite, enemy_group, False, pg.sprite.collide_mask):
-                    text_collision = game_font_small.render('Enemy collision: GAME OVER!', False, 'Red')
-                    screen.blit(text_collision, (600, 50))
-                    game_day = game_mode  # save game day
-                    game_mode = Game.OVER  # GAME OVER!
-                    play_music = True  # to change background music
+            current_time = pg.time.get_ticks()
+            # check cooldown time
+            if current_time - last_collision_time > cooldown_time:
+                # check hero collision with enemy group rect
+                if pg.sprite.spritecollide(hero.sprite, enemy_group, False):
+                    # check hero collision with enemy group mask
+                    if pg.sprite.spritecollide(hero.sprite, enemy_group, False, pg.sprite.collide_mask):
+
+                        # reduce hero life
+                        hero.sprite.heart_counter -= 1
+                        if hero.sprite.heart_counter > 0:
+                            pass
+                        else:
+                            game_day = game_mode  # save game day
+                            # game_mode = Game.OVER  # GAME OVER!
+                            play_music = True  # to change background music
+
+                        # save collision time (for cooldown time)
+                        last_collision_time = current_time
+
+                        # print collision text (only for testing)
+                        text_collision = game_font_small.render('ENEMY COLLISION!', False, 'Red')
+                        screen.blit(text_collision, (600, 90))
+
 
             # GAME SCORE  ###################################################################
 
@@ -640,7 +655,7 @@ def main():
                     enemy.hero_dodge = True  # to avoid more than one score increment
 
             # win score selection
-            if game_score >= 20:
+            if game_score >= 5:  # default 20
                 if game_mode == Game.DAY_3:
                     play_music = True  # to change background music
                     game_day = Game.DAY_1
@@ -673,9 +688,13 @@ def main():
             text_screen = game_font_small.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
             screen.blit(text_screen, (10, 90))
 
+            # print heart_counter text
+            text_collision = game_font_small.render(f'HERO life: {hero.sprite.heart_counter}', False, 'Black')
+            screen.blit(text_collision, (600, 10))
+
             # print enemy list on screen
-            text_screen = game_font_small.render(f'ENEMY group: {len(enemy_group.sprites())}', False, 'Black')
-            screen.blit(text_screen, (600, 10))
+            text_screen = game_font_small.render(f'ENEMY group members: {len(enemy_group.sprites())}', False, 'Black')
+            screen.blit(text_screen, (600, 50))
 
             # print game score on screen
             text_screen = game_font_small.render(f'Score: {game_score}', False, 'Black')
