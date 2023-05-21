@@ -18,6 +18,10 @@
     Contact email: alejandronieto40@gmail.com
 """
 
+#########################################################################################
+# IMPORT MODULES
+#########################################################################################
+
 # used for game
 import pygame as pg
 import pandas as pd
@@ -31,20 +35,43 @@ from enum import Enum
 # import csv
 # import numpy as np
 
+
+#########################################################################################
+# GLOBAL PARAMETERS
+#########################################################################################
+
 # GLOBAL screen parameters
-ground_height = 200
-screen_width = 1600
-screen_height = 800
-screen = pg.display.set_mode((screen_width, screen_height))  # canvas for everything!
+GROUND_HEIGHT = 200
+SCREEN_HEIGHT = 800
+SCREEN_WIDTH = 1600
+SCREEN = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # canvas for everything!
+
+# GLOBAL game parameters
+GAME_WIN_SCORE = 20  # default 20
 
 # GLOBAL hero parameters
-HERO_LIFE = 3
+HERO_LIFE = 3  # default 3
+HERO_X_START_POS = 200  # default 200
+
+# GLOBAL enemy parameters
+ENEMY_SPAWN_TIME_DAY_1 = 1000  # default 1000
+ENEMY_MOVE_SPEED_DAY_1 = 8  # default 8
+
+ENEMY_SPAWN_TIME_DAY_2 = 800  # default 800
+ENEMY_MOVE_SPEED_DAY_2 = 10  # default 10
+
+ENEMY_SPAWN_TIME_DAY_3 = 600  # default 600
+ENEMY_MOVE_SPEED_DAY_3 = 12  # default 12
 
 # GLOBAL performance parameters
 cycle_time = []  # in seconds
 test_time_limit = 50000  # in ms
 test_spawn_time = 1000  # for performance test
 
+
+#########################################################################################
+# CLASSES
+#########################################################################################
 
 class Hero(pg.sprite.Sprite):
 
@@ -97,7 +124,7 @@ class Hero(pg.sprite.Sprite):
 
         # create image, rect and mask
         self.image = self.frames[self.frame_index]
-        self.rect = self.image.get_rect(midbottom=(200, screen_height - ground_height))
+        self.rect = self.image.get_rect(midbottom=(HERO_X_START_POS, SCREEN_HEIGHT - GROUND_HEIGHT))
         self.mask = pg.mask.from_surface(self.image)
 
         # save original rect height and bottom (used in rect resize method)
@@ -143,8 +170,8 @@ class Hero(pg.sprite.Sprite):
             self.rect.x += self.move_speed
 
         # reset position if screen limit is reached
-        if self.rect.left > screen_width: self.rect.right = 0  # redraw hero on left end
-        if self.rect.right < 0: self.rect.left = screen_width  # # redraw hero on right end
+        if self.rect.left > SCREEN_WIDTH: self.rect.right = 0  # redraw hero on left end
+        if self.rect.right < 0: self.rect.left = SCREEN_WIDTH  # # redraw hero on right end
 
     def jumping(self):
 
@@ -180,7 +207,6 @@ class Hero(pg.sprite.Sprite):
             # jumping animation
             self.frame_index = 12
             self.image = self.frames[self.frame_index]
-            self.rect.height = 200  # reset rect height
 
         # update jump timer
         if self.jump_timer > 0 and self.action == Action.JUMPING:
@@ -189,11 +215,11 @@ class Hero(pg.sprite.Sprite):
         # jump in pixels
         self.jump_pixel = - self.jump_velocity * self.jump_timer \
                           + 0.5 * self.gravity * self.jump_timer ** 2
-        self.rect.bottom = screen_height - ground_height + self.jump_pixel
+        self.rect.bottom = SCREEN_HEIGHT - GROUND_HEIGHT + self.jump_pixel
 
         # on ground action
-        if self.rect.bottom >= screen_height - ground_height:
-            self.rect.bottom = screen_height - ground_height
+        if self.rect.bottom >= SCREEN_HEIGHT - GROUND_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT - GROUND_HEIGHT
             self.jump_timer = 0  # reset jump timer
             self.action = Action.ON_GROUND
 
@@ -204,9 +230,9 @@ class Hero(pg.sprite.Sprite):
         rect_y = self.rect.y
         rect_width = self.rect.width
         rect_height = self.rect.height
-        pg.draw.rect(screen, 'red', pg.Rect(rect_x, rect_y, rect_width, rect_height), 4)
+        pg.draw.rect(SCREEN, 'red', pg.Rect(rect_x, rect_y, rect_width, rect_height), 4)
 
-    def resize_rect(self):
+    def resize_rect(self):  # deprecated due to masks
 
         # create a mask from the image surface
         mask = pg.mask.from_surface(self.image)
@@ -238,12 +264,7 @@ class Enemy(pg.sprite.Sprite):
         super().__init__()
 
         # enemy speed depending on the day
-        if game_mode == Game.DAY_3:
-            self.move_speed = 12
-        elif game_mode == Game.DAY_2:
-            self.move_speed = 10
-        else:  # default DAY_1
-            self.move_speed = 8  # default 8
+        self.move_speed = globals()[f'ENEMY_MOVE_SPEED_{game_mode.name}']
 
         # parameter used for the score
         self.hero_dodge = False
@@ -271,7 +292,7 @@ class Enemy(pg.sprite.Sprite):
 
         # obstacle appear at random position
         rand_position_x = randint(1200, 1800)
-        rand_position_y = screen_height - ground_height - randint(0, 300)
+        rand_position_y = SCREEN_HEIGHT - GROUND_HEIGHT - randint(0, 300)
 
         # create Enemy_x image and rect
         self.image = self.frames[self.frame_index]
@@ -344,7 +365,7 @@ class Game(Enum):
 
 
 def main():
-    ########################################################################################
+    #########################################################################################
     # game mode: GAME INIT
     #########################################################################################
     pg.init()
@@ -456,21 +477,21 @@ def main():
                 play_music = False
 
             # black screen
-            screen.fill(fill_color)
+            SCREEN.fill(fill_color)
 
             # game over text (big font)
             game_mode_text = game_font_big.render(text_message, True, text_color)
-            game_mode_rect = game_mode_text.get_rect(center=(screen_width / 2, screen_height / 2))
-            screen.blit(game_mode_text, game_mode_rect)
+            game_mode_rect = game_mode_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+            SCREEN.blit(game_mode_text, game_mode_rect)
 
             # restart text (small font)
             game_restart_text = game_font_small.render(f"press ENTER to restart", True, text_color)
-            game_restart_rect = game_restart_text.get_rect(center=(screen_width / 2, (screen_height / 2) + 100))
-            screen.blit(game_restart_text, game_restart_rect)
+            game_restart_rect = game_restart_text.get_rect(center=(SCREEN_WIDTH / 2, (SCREEN_HEIGHT / 2) + 100))
+            SCREEN.blit(game_restart_text, game_restart_rect)
 
             # print music credit
             text_screen = game_font_small.render(text_music, False, text_color)
-            screen.blit(text_screen, (1000, 750))
+            SCREEN.blit(text_screen, (1000, 750))
 
             # Get the state of the keyboard
             keys = pg.key.get_pressed()
@@ -514,21 +535,21 @@ def main():
                 text_message = "NEXT LEVEL"
 
             # black screen
-            screen.fill(fill_color)
+            SCREEN.fill(fill_color)
 
             # game over text (big font)
             game_mode_text = game_font_big.render(text_message, True, text_color)
-            game_mode_rect = game_mode_text.get_rect(center=(screen_width / 2, screen_height / 2))
-            screen.blit(game_mode_text, game_mode_rect)
+            game_mode_rect = game_mode_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+            SCREEN.blit(game_mode_text, game_mode_rect)
 
             # restart text (small font)
             game_restart_text = game_font_small.render(f"press SPACE to continue", True, text_color)
-            game_restart_rect = game_restart_text.get_rect(center=(screen_width / 2, (screen_height / 2) + 100))
-            screen.blit(game_restart_text, game_restart_rect)
+            game_restart_rect = game_restart_text.get_rect(center=(SCREEN_WIDTH / 2, (SCREEN_HEIGHT / 2) + 100))
+            SCREEN.blit(game_restart_text, game_restart_rect)
 
             # print music credit
             text_screen = game_font_small.render(text_music, False, text_color)
-            screen.blit(text_screen, (1000, 750))
+            SCREEN.blit(text_screen, (1000, 750))
 
             # restart hero life
             hero.sprite.heart_counter = HERO_LIFE
@@ -545,8 +566,8 @@ def main():
             if keys[pg.K_SPACE]:
 
                 # restart hero and enemies position
-                hero.sprite.rect.x = 200
-                hero.sprite.rect.bottom = screen_height - ground_height
+                hero.sprite.rect.x = HERO_X_START_POS
+                hero.sprite.rect.bottom = SCREEN_HEIGHT - GROUND_HEIGHT
                 # enemy_02_rect.x = 1000
 
                 # restart jump parameters
@@ -570,12 +591,7 @@ def main():
                     game_mode = game_day  # continue from current day
 
                 # set enemy spawn timer depending on the day
-                if game_mode == Game.DAY_3:
-                    pg.time.set_timer(timer_enemy_01_spawn, 600)
-                elif game_mode == Game.DAY_2:
-                    pg.time.set_timer(timer_enemy_01_spawn, 800)
-                else:  # default DAY_1
-                    pg.time.set_timer(timer_enemy_01_spawn, 1000)  # default 1000
+                pg.time.set_timer(timer_enemy_01_spawn, globals()[f'ENEMY_SPAWN_TIME_{game_mode.name}'])
 
         #####################################################################################
         # game mode: GAME ACTIVE
@@ -610,10 +626,10 @@ def main():
             horizon_surf = pg.image.load(f'graphics/horizont_{game_mode.name}.png').convert()
 
             # draw background
-            screen.blit(horizon_surf, (0, 0))
+            SCREEN.blit(horizon_surf, (0, 0))
 
             # draw hero using sprites
-            hero.draw(screen)
+            hero.draw(SCREEN)
             hero.update()
 
             # # hero mask image (only for testing)
@@ -622,10 +638,10 @@ def main():
             # screen.blit(mask_surface, (0, 600))
 
             # draw heart (hero life)
-            heart_group.draw(screen)
+            heart_group.draw(SCREEN)
 
             # draw enemy group
-            enemy_group.draw(screen)
+            enemy_group.draw(SCREEN)
             enemy_group.update()
 
             # COLLISIONS  ###################################################################
@@ -651,7 +667,7 @@ def main():
 
                         # print collision text (only for testing)
                         text_collision = game_font_small.render('ENEMY COLLISION!', False, 'Red')
-                        screen.blit(text_collision, (600, 90))
+                        SCREEN.blit(text_collision, (600, 90))
 
             # GAME SCORE  ###################################################################
 
@@ -666,7 +682,7 @@ def main():
                     enemy.hero_dodge = True  # to avoid more than one score increment
 
             # win score selection
-            if game_score >= 5:  # default 20
+            if game_score >= GAME_WIN_SCORE:
                 if game_mode == Game.DAY_3:
                     play_music = True  # to change background music
                     game_day = Game.DAY_1
@@ -678,47 +694,47 @@ def main():
             # GRID LINES  ###################################################################
 
             # Draw the horizontal lines of the grid
-            for y in range(0, screen_height, 50):
-                pg.draw.line(screen, 'Black', (0, y), (screen_width, y))
+            for y in range(0, SCREEN_HEIGHT, 50):
+                pg.draw.line(SCREEN, 'Black', (0, y), (SCREEN_WIDTH, y))
 
             # Draw the vertical lines of the grid
-            for x in range(0, screen_width, 50):
-                pg.draw.line(screen, 'Black', (x, 0), (x, screen_height))
+            for x in range(0, SCREEN_WIDTH, 50):
+                pg.draw.line(SCREEN, 'Black', (x, 0), (x, SCREEN_HEIGHT))
 
             # TEXT MESSAGES #################################################################
 
             # print hero action on screen
             text_screen = game_font_small.render(f'Action mode: {hero.sprite.action.name}', False, 'Black')
-            screen.blit(text_screen, (10, 10))
+            SCREEN.blit(text_screen, (10, 10))
 
             # print jump force list on screen
             text_screen = game_font_small.render(f'JUMP force: {hero.sprite.jump_force}', False, 'Black')
-            screen.blit(text_screen, (10, 50))
+            SCREEN.blit(text_screen, (10, 50))
 
             # print game score list on screen
             text_screen = game_font_small.render(f'JUMP timer: {hero.sprite.jump_timer}', False, 'Black')
-            screen.blit(text_screen, (10, 90))
+            SCREEN.blit(text_screen, (10, 90))
 
             # print heart_counter text
             text_collision = game_font_small.render(f'HERO life: {hero.sprite.heart_counter}', False, 'Black')
-            screen.blit(text_collision, (600, 10))
+            SCREEN.blit(text_collision, (600, 10))
 
             # print enemy list on screen
             text_screen = game_font_small.render(f'ENEMY group members: {len(enemy_group.sprites())}', False, 'Black')
-            screen.blit(text_screen, (600, 50))
+            SCREEN.blit(text_screen, (600, 50))
 
             # print game score on screen
             text_screen = game_font_small.render(f'Score: {game_score}', False, 'Black')
-            screen.blit(text_screen, (1200, 10))
+            SCREEN.blit(text_screen, (1200, 10))
 
             # print music credit
             text_screen = game_font_small.render(text_music, False, 'Black')
-            screen.blit(text_screen, (1000, 750))
+            SCREEN.blit(text_screen, (1000, 750))
 
             # # print execution time
             frame_time = pg.time.get_ticks() - start_time  # measure the time elapsed since the last frame
             text_screen = game_font_small.render(f'Total time: {pg.time.get_ticks()} ms', False, 'Black')
-            screen.blit(text_screen, (1200, 50))
+            SCREEN.blit(text_screen, (1200, 50))
 
             # PERFORMANCE ###################################################################
 
