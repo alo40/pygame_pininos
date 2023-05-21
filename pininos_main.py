@@ -54,6 +54,10 @@ HERO_LIFE = 3  # default 3
 HERO_X_START_POS = 200  # default 200
 
 # GLOBAL enemy parameters
+# ENEMY_TYPE_LIST = ['enemy_01', 'enemy_02']
+ENEMY_TYPE_LIST = ['enemy_02']
+ENEMY_ANIMATION_TIME = 200  # default 200 (in ms)
+
 ENEMY_SPAWN_TIME_DAY_1 = 1000  # default 1000
 ENEMY_MOVE_SPEED_DAY_1 = 8  # default 8
 
@@ -287,6 +291,27 @@ class Enemy(pg.sprite.Sprite):
             self.frames = [frame1, frame2, frame3, frame4, frame5, frame6, frame7, frame8, frame9, frame10]
             self.frame_index = 0
 
+        if type == 'enemy_02':
+
+            # enemy_02 new frames
+            frame1 = pg.image.load('graphics/evil_eye_2nd_type_big1.png').convert_alpha()
+            frame2 = pg.image.load('graphics/evil_eye_2nd_type_big2.png').convert_alpha()
+            frame3 = pg.image.load('graphics/evil_eye_2nd_type_big3.png').convert_alpha()
+            frame4 = pg.image.load('graphics/evil_eye_2nd_type_big4.png').convert_alpha()
+            frame5 = pg.image.load('graphics/evil_eye_2nd_type_big5.png').convert_alpha()
+            frame6 = pg.image.load('graphics/evil_eye_2nd_type_big6.png').convert_alpha()
+            frame7 = pg.image.load('graphics/evil_eye_2nd_type_big7.png').convert_alpha()
+            frame8 = pg.image.load('graphics/evil_eye_2nd_type_big8.png').convert_alpha()
+            frame9 = pg.image.load('graphics/evil_eye_2nd_type_big9.png').convert_alpha()
+            frame10 = pg.image.load('graphics/evil_eye_2nd_type_big10.png').convert_alpha()
+            frame11 = frame1
+
+
+            # concatenate frames
+            # self.frames = [frame1, frame2, frame3, frame4, frame5, frame7, frame8, frame9]
+            self.frames = [frame1, frame2, frame3, frame4, frame5, frame6, frame7, frame8, frame9, frame10]
+            self.frame_index = 0
+
         else:  # other type of enemy can be used here
             pass
 
@@ -416,7 +441,7 @@ def main():
 
     # timers enemy_01 animation
     timer_enemy_01_animation = pg.USEREVENT + 3  # +3 is used to avoid conflicts with pygame user events
-    pg.time.set_timer(timer_enemy_01_animation, 200)  # tigger event in x ms
+    pg.time.set_timer(timer_enemy_01_animation, ENEMY_ANIMATION_TIME)  # tigger event in x ms
 
     # game loop
     while True:
@@ -448,7 +473,8 @@ def main():
                     and (game_mode == Game.DAY_1 or game_mode == Game.DAY_2 or game_mode == Game.DAY_3):
 
                 # add new element to enemy group
-                enemy_group.add(Enemy('enemy_01', game_mode))
+                # enemy_group.add(Enemy('enemy_01', game_mode))
+                enemy_group.add(Enemy(choice(ENEMY_TYPE_LIST), game_mode))
 
             # TIMER EVENT: ENEMY_01 ANIMATION
             if event.type == timer_enemy_01_animation \
