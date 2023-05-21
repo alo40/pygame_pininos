@@ -54,9 +54,8 @@ HERO_LIFE = 3  # default 3
 HERO_X_START_POS = 200  # default 200
 
 # GLOBAL enemy parameters
-# ENEMY_TYPE_LIST = ['enemy_01', 'enemy_02']
-ENEMY_TYPE_LIST = ['enemy_02']
-ENEMY_ANIMATION_TIME = 400  # default 200 (in ms)
+ENEMY_TYPE_LIST = ['enemy_01', 'enemy_01', 'enemy_01', 'enemy_02']  # enemy_01 is more likely to spawn than enemy_02
+ENEMY_ANIMATION_TIME = 200  # default 200 (in ms)
 
 ENEMY_SPAWN_TIME_DAY_1 = 1000  # default 1000
 ENEMY_MOVE_SPEED_DAY_1 = 8  # default 8
@@ -173,9 +172,13 @@ class Hero(pg.sprite.Sprite):
         elif keys[pg.K_RIGHT]:
             self.rect.x += self.move_speed
 
-        # reset position if screen limit is reached
-        if self.rect.left > SCREEN_WIDTH: self.rect.right = 0  # redraw hero on left end
-        if self.rect.right < 0: self.rect.left = SCREEN_WIDTH  # # redraw hero on right end
+        # stop hero on screen borders
+        if self.rect.right > SCREEN_WIDTH: self.rect.right = SCREEN_WIDTH
+        if self.rect.left < 0: self.rect.left = 0
+
+        # # reset position if screen limit is reached (deprecated)
+        # if self.rect.left > SCREEN_WIDTH: self.rect.right = 0  # redraw hero on left end
+        # if self.rect.right < 0: self.rect.left = SCREEN_WIDTH  # # redraw hero on right end
 
     def jumping(self):
 
