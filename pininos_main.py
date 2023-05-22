@@ -315,8 +315,8 @@ class Enemy(pg.sprite.Sprite):
         else:  # other type of enemy can be used here
             pass
 
-        # obstacle appear at random position
-        rand_position_x = randint(1200, 1800)
+        # enemy appear at random position
+        rand_position_x = randint(2000, 2500)
         rand_position_y = SCREEN_HEIGHT - GROUND_HEIGHT - randint(0, 300)
 
         # create Enemy_x image and rect
